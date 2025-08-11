@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت سیگنال‌ها - Smart Money Bot</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-coins text-warning me-2"></i>
+                ربات تحلیل طلای جهانی
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>خانه</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard"><i class="fas fa-chart-line me-1"></i>داشبورد</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/signals"><i class="fas fa-signal me-1"></i>سیگنال‌ها</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin"><i class="fas fa-cog me-1"></i>مدیریت</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            خطا: {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2>
+                        <i class="fas fa-signal text-primary me-2"></i>
+                        مدیریت سیگنال‌ها
+                    </h2>
+                    <button class="btn btn-primary" onclick="refreshSignals()">
+                        <i class="fas fa-sync-alt me-1"></i>
+                        بروزرسانی
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter and Search -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="GET" class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">فیلتر وضعیت:</label>
+                                <select name="status" class="form-select">
+                                    <option value="">همه</option>
+                                    <option value="pending" {{ 'selected' if request.args.get('status') == 'pending' }}>در انتظار</option>
+                                    <option value="approved" {{ 'selected' if request.args.get('status') == 'approved' }}>تأیید شده</option>
+                                    <option value="rejected" {{ 'selected' if request.args.get('status') == 'rejected' }}>رد شده</option>
+                                    <option value="executed" {{ 'selected' if request.args.get('status') == 'executed' }}>اجرا شده</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">نوع سیگنال:</label>
+                                <select name="signal_type" class="form-select">
+                                    <option value="">همه</option>
+                                    <option value="BUY" {{ 'selected' if request.args.get('signal_type') == 'BUY' }}>خرید</option>
+                                    <option value="SELL" {{ 'selected' if request.args.get('signal_type') == 'SELL' }}>فروش</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">تایم فریم:</label>
+                                <select name="timeframe" class="form-select">
+                                    <option value="">همه</option>
+                                    <option value="M15" {{ 'selected' if request.args.get('timeframe') == 'M15' }}>M15</option>
+                                    <option value="H1" {{ 'selected' if request.args.get('timeframe') == 'H1' }}>H1</option>
+                                    <option value="H4" {{ 'selected' if request.args.get('timeframe') == 'H4' }}>H4</option>
+                                    <option value="D1" {{ 'selected' if request.args.get('timeframe') == 'D1' }}>D1</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div>
+                                    <button type="submit" class="btn btn-secondary me-2">
+                                        <i class="fas fa-filter me-1"></i>اعمال فیلتر
+                                    </button>
+                                    <a href="/signals" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>پاک کردن
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signals Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-list me-2"></i>
+                            لیست سیگنال‌ها
+                            {% if signals and signals.items %}
+                                <span class="badge bg-info ms-2">{{ signals.total }} مورد</span>
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if signals and signals.items %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>نوع</th>
+                                        <th>قیمت ورود</th>
+                                        <th>Stop Loss</th>
+                                        <th>Take Profit</th>
+                                        <th>R/R</th>
+                                        <th>تایم فریم</th>
+                                        <th>الگو</th>
+                                        <th>اعتماد</th>
+                                        <th>وضعیت</th>
+                                        <th>نتیجه</th>
+                                        <th>زمان ایجاد</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for signal in signals.items %}
+                                    <tr>
+                                        <td><small>#{{ signal.id }}</small></td>
+                                        <td>
+                                            {% if signal.signal_type == 'BUY' %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-arrow-up me-1"></i>خرید
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-arrow-down me-1"></i>فروش
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="fw-bold">${{ "%.2f"|format(signal.entry_price) if signal.entry_price else '--' }}</td>
+                                        <td>${{ "%.2f"|format(signal.stop_loss) if signal.stop_loss else '--' }}</td>
+                                        <td>${{ "%.2f"|format(signal.take_profit) if signal.take_profit else '--' }}</td>
+                                        <td>
+                                            {% if signal.entry_price and signal.stop_loss and signal.take_profit %}
+                                                {% set risk = (signal.entry_price - signal.stop_loss) if signal.signal_type == 'BUY' else (signal.stop_loss - signal.entry_price) %}
+                                                {% set reward = (signal.take_profit - signal.entry_price) if signal.signal_type == 'BUY' else (signal.entry_price - signal.take_profit) %}
+                                                {% if risk > 0 %}
+                                                    <span class="badge bg-info">1:{{ "%.1f"|format(reward/risk) }}</span>
+                                                {% else %}
+                                                    --
+                                                {% endif %}
+                                            {% else %}
+                                                --
+                                            {% endif %}
+                                        </td>
+                                        <td><span class="badge bg-secondary">{{ signal.timeframe or 'H1' }}</span></td>
+                                        <td>
+                                            <small>{{ signal.pattern[:20] + '...' if signal.pattern and signal.pattern|length > 20 else (signal.pattern or '--') }}</small>
+                                        </td>
+                                        <td>
+                                            {% if signal.confidence %}
+                                                {% set confidence_percent = (signal.confidence * 100)|int %}
+                                                {% if confidence_percent >= 80 %}
+                                                    <span class="badge bg-success">{{ confidence_percent }}%</span>
+                                                {% elif confidence_percent >= 60 %}
+                                                    <span class="badge bg-warning">{{ confidence_percent }}%</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ confidence_percent }}%</span>
+                                                {% endif %}
+                                            {% else %}
+                                                --
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if signal.status == 'pending' %}
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-clock me-1"></i>در انتظار
+                                                </span>
+                                            {% elif signal.status == 'approved' %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>تأیید شده
+                                                </span>
+                                            {% elif signal.status == 'rejected' %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times me-1"></i>رد شده
+                                                </span>
+                                            {% elif signal.status == 'executed' %}
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-play me-1"></i>اجرا شده
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ signal.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if signal.result == 'win' %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-trophy me-1"></i>برد
+                                                </span>
+                                            {% elif signal.result == 'loss' %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times me-1"></i>باخت
+                                                </span>
+                                            {% elif signal.result == 'breakeven' %}
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-minus me-1"></i>سربه‌سر
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">--</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>{{ signal.created_at.strftime('%m/%d %H:%M') if signal.created_at else '--' }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                {% if signal.status == 'pending' %}
+                                                    <button class="btn btn-success btn-sm" onclick="approveSignal({{ signal.id }})" title="تأیید">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button class="btn btn-danger btn-sm" onclick="rejectSignal({{ signal.id }})" title="رد">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                {% endif %}
+                                                <button class="btn btn-info btn-sm" onclick="showSignalDetails({{ signal.id }})" title="جزئیات">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if signals.pages > 1 %}
+                        <nav aria-label="صفحه‌بندی سیگنال‌ها" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if signals.has_prev %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('signals', page=signals.prev_num, **request.args) }}">قبلی</a>
+                                    </li>
+                                {% endif %}
+                                
+                                {% for page_num in signals.iter_pages() %}
+                                    {% if page_num %}
+                                        {% if page_num != signals.page %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ url_for('signals', page=page_num, **request.args) }}">{{ page_num }}</a>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ page_num }}</span>
+                                            </li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">…</span>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if signals.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('signals', page=signals.next_num, **request.args) }}">بعدی</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                        {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-signal fa-4x mb-3 opacity-50"></i>
+                            <h5>هیچ سیگنالی یافت نشد</h5>
+                            <p>با تنظیمات فعلی فیلتر، سیگنالی موجود نیست.</p>
+                            <a href="/signals" class="btn btn-secondary">پاک کردن فیلترها</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signal Details Modal -->
+    <div class="modal fade" id="signalDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">جزئیات سیگنال</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="signalDetailsContent">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>مدیریت سیگنال‌های طلای جهانی</h6>
+                    <p class="small text-muted">کنترل و نظارت بر تمامی سیگنال‌های تولید شده</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="small text-muted">
+                        سیگنال‌دهی هر 15 دقیقه<br>
+                        تأیید دستی ادمین مطلوب
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    
+    <script>
+        function refreshSignals() {
+            window.location.reload();
+        }
+
+        function approveSignal(signalId) {
+            if (confirm('آیا از تأیید این سیگنال اطمینان دارید؟')) {
+                fetch(`/api/approve_signal/${signalId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('سیگنال با موفقیت تأیید شد!');
+                        window.location.reload();
+                    } else {
+                        alert('خطا در تأیید سیگنال: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('خطا در ارتباط با سرور');
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        function rejectSignal(signalId) {
+            if (confirm('آیا از رد این سیگنال اطمینان دارید؟')) {
+                fetch(`/api/reject_signal/${signalId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('سیگنال رد شد');
+                        window.location.reload();
+                    } else {
+                        alert('خطا در رد سیگنال: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('خطا در ارتباط با سرور');
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        function showSignalDetails(signalId) {
+            // This would fetch and display detailed signal information
+            document.getElementById('signalDetailsContent').innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">در حال بارگذاری...</span>
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('signalDetailsModal'));
+            modal.show();
+            
+            // Here you would fetch signal details from API
+            setTimeout(() => {
+                document.getElementById('signalDetailsContent').innerHTML = `
+                    <p>جزئیات سیگنال #${signalId} در حال توسعه است.</p>
+                `;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

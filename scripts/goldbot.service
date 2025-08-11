@@ -1,0 +1,35 @@
+[Unit]
+Description=Gold Trading Bot - ربات تحلیل طلا
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+# تغییر این مسیر به مسیر واقعی پروژه شما
+# Change this path to your actual project path
+WorkingDirectory=/home/username/gold-trading-bot
+# تغییر username به نام کاربری واقعی
+# Change username to actual username  
+User=username
+Group=username
+
+# متغیرهای محیطی
+Environment=PATH=/home/username/gold-trading-bot/venv/bin
+Environment=PYTHONPATH=/home/username/gold-trading-bot
+
+# دستور اجرا
+ExecStart=/home/username/gold-trading-bot/venv/bin/python /home/username/gold-trading-bot/main.py
+
+# تنظیمات راه‌اندازی مجدد
+Restart=always
+RestartSec=10
+KillMode=mixed
+TimeoutStopSec=5
+
+# لاگ‌گیری
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=goldbot
+
+[Install]
+WantedBy=multi-user.target

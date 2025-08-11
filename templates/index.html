@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ربات تحلیل طلای جهانی - Smart Money Bot</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-coins text-warning me-2"></i>
+                ربات تحلیل طلای جهانی
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/"><i class="fas fa-home me-1"></i>خانه</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard"><i class="fas fa-chart-line me-1"></i>داشبورد</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/signals"><i class="fas fa-signal me-1"></i>سیگنال‌ها</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin"><i class="fas fa-cog me-1"></i>مدیریت</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            خطا: {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Market Status Card -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-line text-warning me-2"></i>
+                            وضعیت فعلی بازار طلا
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h3 class="text-warning mb-1" id="current-price">
+                                        {% if market_data and market_data.current_price %}
+                                            ${{ "%.2f"|format(market_data.current_price) }}
+                                        {% else %}
+                                            $---.--
+                                        {% endif %}
+                                    </h3>
+                                    <small class="text-muted">قیمت فعلی XAUUSD</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="mb-1" id="trend-status">
+                                        {% if analysis and analysis.trend == 'BULLISH' %}
+                                            <span class="text-success"><i class="fas fa-arrow-up me-1"></i>صعودی</span>
+                                        {% elif analysis and analysis.trend == 'BEARISH' %}
+                                            <span class="text-danger"><i class="fas fa-arrow-down me-1"></i>نزولی</span>
+                                        {% else %}
+                                            <span class="text-warning"><i class="fas fa-minus me-1"></i>خنثی</span>
+                                        {% endif %}
+                                    </h4>
+                                    <small class="text-muted">روند کلی</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="mb-1" id="signal-count">
+                                        {{ signals|length if signals else 0 }}
+                                    </h4>
+                                    <small class="text-muted">سیگنال‌های امروز</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="mb-1">
+                                        <span class="text-info" id="last-update">
+                                            {{ moment().format('HH:mm') if moment else '--:--' }}
+                                        </span>
+                                    </h4>
+                                    <small class="text-muted">آخرین بروزرسانی</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Latest Analysis -->
+        {% if analysis %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-brain text-info me-2"></i>
+                            آخرین تحلیل
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="text-muted mb-2">توصیه کلی:</h6>
+                                <p class="mb-3">{{ analysis.recommendation or 'در حال تحلیل...' }}</p>
+                                
+                                {% if analysis.technical_indicators %}
+                                <div class="row">
+                                    <div class="col-6">
+                                        <small class="text-muted">RSI:</small>
+                                        <strong class="ms-2">{{ "%.1f"|format(analysis.technical_indicators.rsi) if analysis.technical_indicators.rsi else '--' }}</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">MA20:</small>
+                                        <strong class="ms-2">${{ "%.2f"|format(analysis.technical_indicators.ma20) if analysis.technical_indicators.ma20 else '--' }}</strong>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-end">
+                                    <small class="text-muted">زمان تحلیل:</small><br>
+                                    <strong>{{ analysis.created_at.strftime('%Y/%m/%d %H:%M') if analysis.created_at else '--' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Signals -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-signal text-success me-2"></i>
+                            سیگنال‌های اخیر
+                        </h5>
+                        <a href="/signals" class="btn btn-sm btn-outline-primary">
+                            مشاهده همه
+                            <i class="fas fa-arrow-left ms-1"></i>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if signals %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>نوع</th>
+                                        <th>قیمت ورود</th>
+                                        <th>Stop Loss</th>
+                                        <th>Take Profit</th>
+                                        <th>الگو</th>
+                                        <th>وضعیت</th>
+                                        <th>زمان</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for signal in signals[:5] %}
+                                    <tr>
+                                        <td>
+                                            {% if signal.signal_type == 'BUY' %}
+                                                <span class="badge bg-success">خرید</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">فروش</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>${{ "%.2f"|format(signal.entry_price) if signal.entry_price else '--' }}</td>
+                                        <td>${{ "%.2f"|format(signal.stop_loss) if signal.stop_loss else '--' }}</td>
+                                        <td>${{ "%.2f"|format(signal.take_profit) if signal.take_profit else '--' }}</td>
+                                        <td>{{ signal.pattern or '--' }}</td>
+                                        <td>
+                                            {% if signal.status == 'pending' %}
+                                                <span class="badge bg-warning">در انتظار</span>
+                                            {% elif signal.status == 'approved' %}
+                                                <span class="badge bg-success">تأیید شده</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ signal.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ signal.created_at.strftime('%H:%M') if signal.created_at else '--' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-chart-line fa-3x mb-3 opacity-50"></i>
+                            <p>هنوز سیگنالی ثبت نشده است</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                        <h6>وضعیت ربات</h6>
+                        <span class="badge bg-success">فعال</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fab fa-telegram fa-3x text-info mb-3"></i>
+                        <h6>اتصال تلگرام</h6>
+                        <span class="badge bg-success">متصل</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-database fa-3x text-warning mb-3"></i>
+                        <h6>پایگاه داده</h6>
+                        <span class="badge bg-success">آنلاین</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>ربات تحلیل طلای جهانی</h6>
+                    <p class="small text-muted">سیستم هوشمند تحلیل و سیگنال‌دهی طلا با Smart Money Concepts</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="small text-muted">
+                        ساعات فعالیت: ۰۷:۳۰ تا ۲۲:۰۰<br>
+                        گزارش‌های روزانه: ۰۹:۰۹ و ۱۵:۱۵
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    
+    <script>
+        // Auto-refresh data every 5 minutes
+        setInterval(function() {
+            fetch('/api/market_status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.current_price) {
+                        document.getElementById('current-price').textContent = '$' + data.current_price.toFixed(2);
+                    }
+                    document.getElementById('last-update').textContent = new Date().toLocaleTimeString('fa-IR', {hour: '2-digit', minute: '2-digit'});
+                })
+                .catch(error => console.log('خطا در بروزرسانی:', error));
+        }, 300000); // 5 minutes
+    </script>
+</body>
+</html>

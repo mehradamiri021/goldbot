@@ -1,0 +1,162 @@
+{
+  "bot_config": {
+    "name": "Smart Gold Trading Bot",
+    "version": "1.0.0",
+    "description": "ربات جامع تحلیل و سیگنال‌دهی طلا با هوش مصنوعی و Smart Money Concepts",
+    "timezone": "Asia/Tehran",
+    "market_hours": {
+      "start": "07:30",
+      "end": "22:00",
+      "working_days": [1, 2, 3, 4, 5]
+    }
+  },
+  "telegram": {
+    "bot_token": "7522433521:AAF7ugwzUy7k9OPqcGqEv_45hHsG83PpP-Y",
+    "channel_id": "-1002717718463",
+    "admin_id": "1112066452",
+    "channel_name": "تحلیل‌های طلای جهانی",
+    "reports": {
+      "morning_time": "09:09",
+      "evening_time": "15:15",
+      "admin_time": "12:00",
+      "weekly_time": "12:12",
+      "weekly_day": "sunday"
+    }
+  },
+  "api": {
+    "data_source": "http://46.100.50.194:5050/get_data",
+    "symbol": "XAUUSD",
+    "timeout": 30,
+    "retry_attempts": 3,
+    "rate_limit": {
+      "requests_per_minute": 60,
+      "burst_limit": 10
+    }
+  },
+  "analysis": {
+    "timeframes": ["M15", "H1", "H4", "D1"],
+    "signal_monitoring_interval": 15,
+    "market_status_interval": 5,
+    "minimum_confidence": 0.6,
+    "smart_money": {
+      "swing_length": 15,
+      "order_block_length": 5,
+      "min_fvg_size": 5,
+      "liquidity_threshold": 3
+    },
+    "technical_indicators": {
+      "rsi_period": 14,
+      "rsi_overbought": 70,
+      "rsi_oversold": 30,
+      "ma_periods": [20, 50, 200],
+      "bollinger_period": 20,
+      "bollinger_deviation": 2,
+      "macd_fast": 12,
+      "macd_slow": 26,
+      "macd_signal": 9,
+      "atr_period": 14
+    }
+  },
+  "risk_management": {
+    "default_stop_loss_percent": 0.5,
+    "default_take_profit_percent": 1.5,
+    "minimum_rr_ratio": 1.5,
+    "maximum_signals_per_day": 10,
+    "position_sizing": {
+      "conservative": 1,
+      "moderate": 2,
+      "aggressive": 3
+    }
+  },
+  "notifications": {
+    "admin_approval_required": true,
+    "signal_timeout_minutes": 60,
+    "max_pending_signals": 5,
+    "notification_types": {
+      "new_signal": true,
+      "signal_result": true,
+      "system_alerts": true,
+      "market_events": true
+    }
+  },
+  "database": {
+    "cleanup_interval_days": 1,
+    "signal_retention_days": 30,
+    "analysis_retention_days": 90,
+    "message_retention_days": 30,
+    "backup_interval_hours": 24
+  },
+  "logging": {
+    "level": "INFO",
+    "file_rotation": "daily",
+    "max_file_size_mb": 10,
+    "backup_count": 7,
+    "formats": {
+      "console": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+      "file": "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
+    }
+  },
+  "security": {
+    "api_key_rotation_days": 90,
+    "session_timeout_minutes": 30,
+    "max_failed_attempts": 5,
+    "lockout_duration_minutes": 15,
+    "allowed_ips": [],
+    "rate_limiting": {
+      "enabled": true,
+      "requests_per_minute": 100,
+      "burst_limit": 20
+    }
+  },
+  "performance": {
+    "cache_timeout_seconds": 300,
+    "max_concurrent_requests": 10,
+    "request_timeout_seconds": 30,
+    "memory_limit_mb": 512,
+    "cpu_limit_percent": 80
+  },
+  "features": {
+    "auto_signal_generation": true,
+    "auto_report_sending": true,
+    "smart_money_analysis": true,
+    "news_integration": true,
+    "chart_generation": true,
+    "backtesting": false,
+    "machine_learning": false,
+    "sentiment_analysis": true
+  },
+  "news_sources": {
+    "enabled": true,
+    "sources": [
+      {
+        "name": "ForexFactory",
+        "url": "https://www.forexfactory.com/calendar",
+        "weight": 0.8,
+        "enabled": true
+      },
+      {
+        "name": "FXStreet",
+        "url": "https://www.fxstreet.com/news",
+        "weight": 0.7,
+        "enabled": true
+      },
+      {
+        "name": "Investing.com",
+        "url": "https://www.investing.com/news/commodities-news",
+        "weight": 0.6,
+        "enabled": true
+      }
+    ],
+    "update_interval_minutes": 60,
+    "relevance_threshold": 0.5
+  },
+  "charting": {
+    "default_timeframe": "H1",
+    "chart_history_bars": 500,
+    "technical_overlays": ["MA20", "MA50", "BB"],
+    "indicators": ["RSI", "MACD", "Volume"],
+    "smc_overlays": ["OrderBlocks", "FVG", "LiquidityZones"],
+    "export_formats": ["HTML", "PNG"],
+    "theme": "dark"
+  }
+}
