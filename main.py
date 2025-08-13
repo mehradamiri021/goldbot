@@ -54,6 +54,14 @@ def main():
         logger.info(f"✅ ربات آماده اجرا در http://{host}:{port}")
         logger.info(f"✅ Bot ready at http://{host}:{port}")
         
+        # Send startup notification to admin
+        try:
+            from services.admin_notification_service import send_startup_notification
+            send_startup_notification()
+            logger.info("🚀 Startup notification sent to admin")
+        except Exception as e:
+            logger.error(f"❌ Failed to send startup notification: {e}")
+        
         app.run(host=host, port=port, debug=False)
         
     except Exception as e:

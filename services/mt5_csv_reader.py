@@ -25,7 +25,7 @@ class MT5CSVReader:
         # Auto-detect CSV path if not provided
         if csv_path is None:
             try:
-                from config.mt5_config import get_mt5_csv_path, get_csv_files
+                from config.mt5_config import MT5Config
                 self.csv_path = Path(get_mt5_csv_path())
                 self.timeframes = get_csv_files()
             except ImportError:
