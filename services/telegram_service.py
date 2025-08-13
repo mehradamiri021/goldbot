@@ -92,6 +92,30 @@ class TelegramService:
             logger.error(f"Error sending admin report: {e}")
             return None
     
+    def send_admin_notification(self, message, urgent=False):
+        """Send notification to admin"""
+        try:
+            priority = "🚨 URGENT: " if urgent else "ℹ️ "
+            formatted_message = f"{priority}{message}"
+            
+            # Send synchronously using requests for simpler error handling
+            url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
+            data = {
+                'chat_id': self.admin_id,
+                'text': formatted_message,
+                'parse_mode': 'HTML'
+            }
+            
+            response = requests.post(url, data=data, timeout=10)
+            response.raise_for_status()
+            
+            logger.info(f"Admin notification sent: {message[:50]}...")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error sending admin notification: {e}")
+            return False
+    
     async def send_signal_for_approval(self, signal_data):
         """Send signal to admin for approval"""
         try:

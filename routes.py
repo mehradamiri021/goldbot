@@ -143,6 +143,41 @@ def api_market_status():
         app.logger.error(f"Error getting market status: {e}")
         return jsonify({'error': str(e)})
 
+@app.route('/download')
+def download():
+    """Download page for goldbot.zip"""
+    return render_template('download.html')
+
+@app.route('/goldbot.zip')
+def download_zip():
+    """Direct download goldbot.zip"""
+    try:
+        from flask import send_file
+        import os
+        
+        zip_paths = ['goldbot.zip', 'static/goldbot.zip', './goldbot.zip']
+        
+        for zip_path in zip_paths:
+            if os.path.exists(zip_path):
+                return send_file(
+                    zip_path,
+                    as_attachment=True,
+                    download_name='goldbot.zip',
+                    mimetype='application/zip'
+                )
+        
+        return jsonify({
+            'error': 'فایل goldbot.zip یافت نشد',
+            'message': 'goldbot.zip file not found',
+            'paths_checked': zip_paths
+        }), 404
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'خطا در دانلود: {str(e)}',
+            'message': f'Download error: {str(e)}'
+        }), 500
+
 @app.route('/api/signals_chart_data')
 def signals_chart_data():
     """API endpoint for signals chart data"""

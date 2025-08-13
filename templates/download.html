@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دانلود گلدبات - GoldBot Download</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <style>
+        .download-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 0;
+        }
+        
+        .download-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        .download-icon {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            color: #ffd700;
+        }
+        
+        .download-btn {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #333;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 1rem;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .file-info {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+        
+        .features {
+            text-align: right;
+            margin: 2rem 0;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .features li:before {
+            content: "✅ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="download-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10 col-lg-8">
+                    <div class="download-card">
+                        <div class="download-icon">📦</div>
+                        
+                        <h1 class="mb-4">دانلود ربات تحلیل طلا</h1>
+                        <h2 class="h4 mb-4 text-warning">GoldBot Complete Package</h2>
+                        
+                        <div class="file-info">
+                            <h3 class="h5">اطلاعات فایل / File Information</h3>
+                            <p><strong>نام فایل:</strong> goldbot.zip</p>
+                            <p><strong>حجم:</strong> ~101KB</p>
+                            <p><strong>نوع:</strong> پروژه کامل Python</p>
+                            <p><strong>سازگاری:</strong> ویندوز سرور 2019 + لینوکس</p>
+                        </div>
+                        
+                        <div class="features">
+                            <h3 class="h5 mb-3">ویژگی‌های شامل / Included Features</h3>
+                            <ul>
+                                <li>ربات تلگرام کامل با تنظیمات از پیش آماده</li>
+                                <li>تحلیل هوشمند بازار طلا (XAUUSD)</li>
+                                <li>داشبورد وب پیشرفته با نمودارها</li>
+                                <li>حل شده مشکل TA-Lib برای ویندوز</li>
+                                <li>نصب خودکار بدون تنظیمات دستی</li>
+                                <li>راهنمای کامل فارسی</li>
+                                <li>سازگاری کامل ویندوز سرور 2019</li>
+                            </ul>
+                        </div>
+                        
+                        <a href="/static/goldbot.zip" class="download-btn" download="goldbot.zip">
+                            📥 دانلود فوری goldbot.zip
+                        </a>
+                        
+                        <a href="goldbot.zip" class="download-btn" download="goldbot.zip">
+                            🔄 لینک جایگزین
+                        </a>
+                        
+                        <div class="mt-4">
+                            <h4 class="h6">نحوه نصب / Installation</h4>
+                            <p class="small">
+                                1. فایل ZIP را استخراج کنید<br>
+                                2. فایل install_windows_fixed.bat را اجرا کنید<br>
+                                3. پس از نصب: python main.py
+                            </p>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                آخرین بروزرسانی: 11 آگوست 2025<br>
+                                Last Updated: August 11, 2025
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Auto download after 2 seconds
+        setTimeout(function() {
+            console.log('فایل آماده دانلود است');
+            console.log('File ready for download');
+        }, 2000);
+        
+        // Check if file exists
+        fetch('/static/goldbot.zip', {method: 'HEAD'})
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ فایل goldbot.zip موجود است');
+                    console.log('✅ goldbot.zip file exists');
+                } else {
+                    console.log('⚠️ فایل در مسیر /static یافت نشد');
+                    console.log('⚠️ File not found in /static path');
+                }
+            })
+            .catch(err => {
+                console.log('خطا در بررسی فایل:', err);
+                console.log('Error checking file:', err);
+            });
+    </script>
+</body>
+</html>
