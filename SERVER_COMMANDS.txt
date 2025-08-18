@@ -1,0 +1,52 @@
+🚀 دستورات سرور GoldBot - حل سریع مشکل Flask
+
+# در پوشه goldbot/ در سرور:
+
+# روش 1: نصب سریع dependencies
+source venv/bin/activate
+pip install flask flask-sqlalchemy gunicorn
+pip install python-telegram-bot requests pandas
+python main.py
+
+# روش 2: استفاده از اسکریپت (اگر فایل را آپلود کردید)
+chmod +x quick_deps_install.sh
+./quick_deps_install.sh
+
+# روش 3: نصب کامل
+pip install flask==3.0.0 flask-sqlalchemy==3.1.1 gunicorn==21.2.0
+pip install sqlalchemy==2.0.23 psycopg2-binary==2.9.9
+pip install python-telegram-bot==20.8 requests==2.31.0
+pip install pandas==2.1.4 numpy==1.24.4 plotly==5.17.0
+pip install apscheduler==3.10.4 pytz==2023.3.post1
+pip install werkzeug==3.0.1 jdatetime==5.2.0
+pip install beautifulsoup4==4.12.2 trafilatura==1.6.4
+
+# تست
+python -c "import flask, flask_sqlalchemy; print('OK')"
+
+# اجرا
+python main.py
+
+# اجرای production
+gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app
+
+============================================
+
+⚠️ اگر Virtual Environment کار نکرد:
+
+# حذف venv و ایجاد جدید
+deactivate
+rm -rf venv
+python3 -m venv venv
+source venv/bin/activate
+# سپس نصب dependencies بالا
+
+============================================
+
+🌍 اگر همه چیز فیل شد - نصب سیستمی:
+
+deactivate
+sudo apt update  
+sudo pip3 install flask flask-sqlalchemy gunicorn
+sudo pip3 install python-telegram-bot requests
+python3 main.py  # بدون venv

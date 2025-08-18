@@ -1,0 +1,25 @@
+# Windows Server 2019 Compatible Requirements
+# پکیج‌های سازگار با ویندوز سرور 2019
+
+flask==2.3.3
+flask-sqlalchemy==3.0.5
+python-telegram-bot==20.5
+pandas==2.1.1
+numpy==1.25.2
+
+# TA-Lib alternative for Windows - using ta instead
+ta==0.10.2
+
+plotly==5.17.0
+apscheduler==3.10.4
+pytz==2023.3
+requests==2.31.0
+beautifulsoup4==4.12.2
+gunicorn==21.2.0
+trafilatura==1.6.2
+
+# PostgreSQL adapter - works on Windows
+psycopg2-binary==2.9.7
+
+# Email validation for web forms
+email-validator==2.0.0

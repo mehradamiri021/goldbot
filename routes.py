@@ -119,7 +119,15 @@ def real_time_status():
         current_price = float(mt5_data.iloc[-1]['close']) if mt5_data is not None and len(mt5_data) > 0 else 0
         
         # Use cached currency data only - NO API CALLS
-        cached_navasan = real_time_monitor.data_cache.get('navasan_data', {})
+        cached_navasan = {}
+        telegram_data = {}
+        
+        try:
+            if hasattr(real_time_monitor, 'data_cache') and real_time_monitor.data_cache:
+                cached_navasan = real_time_monitor.data_cache.get('navasan_data', {})
+                telegram_data = real_time_monitor.data_cache.get('telegram_data', {})
+        except:
+            pass
         
         # Return real-time status
         return jsonify({
@@ -129,15 +137,15 @@ def real_time_status():
             'current_price': current_price,
             'mt5_status': 'ONLINE' if current_price > 0 else 'OFFLINE',
             'navasan_status': 'ONLINE' if cached_navasan else 'OFFLINE',
-            'telegram_status': 'ONLINE' if real_time_monitor.data_cache.get('telegram_data') else 'OFFLINE',
-            'usd_buy': cached_navasan.get('usd_buy', 0),
-            'usd_sell': cached_navasan.get('usd_sell', 0),
+            'telegram_status': 'ONLINE' if telegram_data else 'OFFLINE',
+            'usd_buy': cached_navasan.get('usd_buy', 0) if cached_navasan else 0,
+            'usd_sell': cached_navasan.get('usd_sell', 0) if cached_navasan else 0,
             'last_updates': {
-                'navasan': monitor_status['last_navasan_update'],
-                'mt5': monitor_status['last_mt5_update'],
-                'telegram': monitor_status['last_telegram_update']
+                'navasan': monitor_status.get('last_navasan_update') if monitor_status else None,
+                'mt5': monitor_status.get('last_mt5_update') if monitor_status else None,
+                'telegram': monitor_status.get('last_telegram_update') if monitor_status else None
             },
-            'update_count': monitor_status['cached_data']['update_count']
+            'update_count': monitor_status.get('cached_data', {}).get('update_count', 0) if monitor_status else 0
         })
         
     except Exception as e:

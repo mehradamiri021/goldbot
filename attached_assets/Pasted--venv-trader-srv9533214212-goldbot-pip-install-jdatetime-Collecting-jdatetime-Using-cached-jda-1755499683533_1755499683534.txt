@@ -1,0 +1,193 @@
+(venv) trader@srv9533214212:~/goldbot$ pip install jdatetime
+Collecting jdatetime
+  Using cached jdatetime-5.2.0-py3-none-any.whl.metadata (5.6 kB)
+Collecting jalali-core>=1.0 (from jdatetime)
+  Using cached jalali_core-1.0.0-py3-none-any.whl.metadata (738 bytes)
+Using cached jdatetime-5.2.0-py3-none-any.whl (12 kB)
+Using cached jalali_core-1.0.0-py3-none-any.whl (3.6 kB)
+Installing collected packages: jalali-core, jdatetime
+Successfully installed jalali-core-1.0.0 jdatetime-5.2.0
+(venv) trader@srv9533214212:~/goldbot$ python main.py
+2025-08-18 09:58:11,274 - INFO - ✅ Found MT5 data at default path: /home/trader/.wine_mt5/drive_c/MT5-CX/MQL5/Files
+2025-08-18 09:58:11,274 - INFO - 🏗️ MT5 CSV Reader initialized for path: /home/trader/.wine_mt5/drive_c/MT5-CX/MQL5/Files
+2025-08-18 09:58:11,275 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 09:58:11,284 - INFO - ✅ MT5 CSV connection successful - 5 test candles
+2025-08-18 09:58:11,284 - INFO - 📊 Latest candle: 2025-08-18 09:00:00 - Price: $3348.51
+2025-08-18 09:58:11,285 - INFO - ✅ MT5 CSV reader initialized successfully
+2025-08-18 09:58:11,285 - INFO - 🏗️ Using MetaTrader 5 data from Wine installation
+2025-08-18 09:58:11,496 - WARNING - ⚠️ Admin routes not available: cannot import name 'send_message_to_channel' from 'services.telegram_service' (/home/trader/goldbot/services/telegram_service.py)
+2025-08-18 09:58:11,508 - WARNING - /etc/timezone is deprecated in some distros, and no longer reliable. tzlocal is ignoring it, and you can likely delete it.
+2025-08-18 09:58:11,524 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,524 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,524 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,524 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,525 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,525 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,525 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,525 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,525 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,525 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,526 - INFO - Added job "🎯 Morning AI Analysis Report (PRIMARY)" to job store "default"
+2025-08-18 09:58:11,527 - INFO - Added job "🎯 Evening AI Analysis Report (PRIMARY)" to job store "default"
+2025-08-18 09:58:11,527 - INFO - Added job "📊 Morning Price Update (11:11) - SECONDARY" to job store "default"
+2025-08-18 09:58:11,528 - INFO - Added job "📊 Afternoon Price Update (14:14) - SECONDARY" to job store "default"
+2025-08-18 09:58:11,528 - INFO - Added job "📊 Evening Price Update (17:17) - SECONDARY" to job store "default"
+2025-08-18 09:58:11,529 - INFO - Added job "Enhanced Daily Admin Report" to job store "default"
+2025-08-18 09:58:11,529 - INFO - Added job "Weekly Comprehensive Report" to job store "default"
+2025-08-18 09:58:11,531 - INFO - Added job "🎯 15-Minute Signal Monitor (PRIMARY)" to job store "default"
+2025-08-18 09:58:11,531 - INFO - Added job "Market Status Check" to job store "default"
+2025-08-18 09:58:11,532 - INFO - Added job "Daily Database Cleanup" to job store "default"
+2025-08-18 09:58:11,532 - INFO - Scheduler started
+2025-08-18 09:58:11,534 - INFO - Scheduler started successfully with all jobs
+2025-08-18 09:58:11,588 - INFO - Component DATA_API status updated to ONLINE
+2025-08-18 09:58:11,590 - INFO - Component TELEGRAM status updated to ONLINE
+2025-08-18 09:58:11,591 - INFO - Component SCHEDULER status updated to ONLINE
+2025-08-18 09:58:11,593 - INFO - Component ANALYSIS status updated to ONLINE
+2025-08-18 09:58:11,599 - INFO - 🏗️ Navasan Service initialized with API key: freeL3ceMo...
+2025-08-18 09:58:11,602 - INFO - 🤖 Price Bot Service initialized
+2025-08-18 09:58:11,680 - INFO - 🔍 ZaryaalGold monitor initialized for channel: @ZaryaalGold
+2025-08-18 09:58:11,681 - INFO - 📊 Fetching currency prices from Navasan API...
+2025-08-18 09:58:11,885 - INFO - ✅ API call successful: /latest
+2025-08-18 09:58:11,886 - INFO - ✅ Navasan API connection successful
+2025-08-18 09:58:11,972 - INFO - HTTP Request: POST https://api.telegram.org/bot7522433521:AAF7ugwzUy7k9OPqcGqEv_45hHsG83PpP-Y/getChat "HTTP/1.1 200 OK"
+2025-08-18 09:58:11,973 - INFO - ✅ Successfully connected to طلای زریال
+2025-08-18 09:58:11,973 - INFO - ✅ ZaryaalGold channel connection successful
+2025-08-18 09:58:11,973 - INFO - ✅ Telegram bot connection successful
+2025-08-18 09:58:11,974 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,974 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,974 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,975 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,975 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 09:58:11,975 - INFO - 📅 Scheduler jobs configured
+2025-08-18 09:58:11,980 - INFO - 📊 Daily statistics initialized for 2025-08-18
+2025-08-18 09:58:11,980 - INFO - ✅ Price Bot Service fully initialized
+2025-08-18 09:58:11,981 - WARNING - Price bot service initialization failed: no running event loop
+2025-08-18 09:58:11,984 - ERROR - Error sending status alert: send_admin_notification() got an unexpected keyword argument 'message_type'
+2025-08-18 09:58:11,984 - INFO - Component TELEGRAM status updated to ERROR
+2025-08-18 09:58:11,984 - INFO - Gold Trading Bot initialized successfully
+2025-08-18 09:58:11,985 - INFO - Database tables initialized successfully
+2025-08-18 09:58:11,985 - INFO - 🚀 راه‌اندازی ربات تحلیل طلا...
+2025-08-18 09:58:11,985 - INFO - 🚀 Starting Gold Trading Bot...
+2025-08-18 09:58:11,987 - INFO - Database tables initialized successfully
+2025-08-18 09:58:11,987 - INFO - ✅ ربات آماده اجرا در http://0.0.0.0:5000
+2025-08-18 09:58:11,987 - INFO - ✅ Bot ready at http://0.0.0.0:5000
+2025-08-18 09:58:12,064 - INFO - HTTP Request: POST https://api.telegram.org/bot7522433521:AAF7ugwzUy7k9OPqcGqEv_45hHsG83PpP-Y/sendMessage "HTTP/1.1 200 OK"
+2025-08-18 09:58:12,065 - INFO - ✅ Admin notification sent: SUCCESS
+2025-08-18 09:58:12,068 - INFO - 🚀 Startup notification sent to admin
+2025-08-18 09:58:12,071 - INFO - 🏗️ Navasan Service initialized with API key: freeL3ceMo...
+2025-08-18 09:58:12,071 - INFO - 🚀 Generating initial market report...
+2025-08-18 09:58:12,071 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 09:58:12,072 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 09:58:12,072 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 09:58:12,079 - INFO - ✅ Successfully loaded 10 H1 candles from MT5
+2025-08-18 09:58:12,080 - INFO - 📈 Price range: $3323.59 - $3358.42
+2025-08-18 09:58:12,080 - INFO - 🕐 Latest: 2025-08-18 09:00:00 - $3348.69
+2025-08-18 09:58:12,080 - INFO - ✅ Successfully got 10 candles from MT5 CSV
+2025-08-18 09:58:12,080 - INFO - 📊 Latest price: $3348.69
+2025-08-18 09:58:12,080 - INFO - 🏗️ Getting M15 data from MT5 CSV files...
+2025-08-18 09:58:12,080 - INFO - 📊 Reading M15 data from MT5 CSV: XAUUSD_M15.csv
+2025-08-18 09:58:12,080 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 09:58:12,086 - INFO - ✅ Successfully loaded 10 M15 candles from MT5
+2025-08-18 09:58:12,087 - INFO - 📈 Price range: $3346.04 - $3358.42
+2025-08-18 09:58:12,087 - INFO - 🕐 Latest: 2025-08-18 09:15:00 - $3348.69
+2025-08-18 09:58:12,087 - INFO - ✅ Successfully got 10 candles from MT5 CSV
+2025-08-18 09:58:12,087 - INFO - 📊 Latest price: $3348.69
+2025-08-18 09:58:12,087 - INFO - 📊 Fetching currency prices from Navasan API...
+2025-08-18 09:58:12,197 - INFO - ✅ API call successful: /latest
+2025-08-18 09:58:12,197 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 09:58:12,197 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 09:58:12,198 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 09:58:12,206 - INFO - ✅ Successfully loaded 50 H1 candles from MT5
+2025-08-18 09:58:12,206 - INFO - 📈 Price range: $3323.59 - $3366.41
+2025-08-18 09:58:12,206 - INFO - 🕐 Latest: 2025-08-18 09:00:00 - $3348.69
+2025-08-18 09:58:12,206 - INFO - ✅ Successfully got 50 candles from MT5 CSV
+2025-08-18 09:58:12,207 - INFO - 📊 Latest price: $3348.69
+2025-08-18 09:58:12,207 - ERROR - Error formatting initial report: unsupported format string passed to NoneType.__format__
+2025-08-18 09:58:12,290 - INFO - Admin notification sent: خطا در تولید گزارش اولیه: unsupported format strin...
+2025-08-18 09:58:12,290 - INFO - ✅ Initial market report sent to admin successfully
+2025-08-18 09:58:12,290 - INFO - 📊 Initial market report sent to admin
+ * Serving Flask app 'app'
+ * Debug mode: off
+2025-08-18 09:58:12,298 - INFO - WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://45.195.250.226:5000
+2025-08-18 09:58:12,299 - INFO - Press CTRL+C to quit
+2025-08-18 09:58:41,526 - INFO - Sending initial test message
+2025-08-18 09:58:41,526 - ERROR - Error updating component status: Column expression, FROM clause, or other columns clause element expected, got <class 'models.BotStatus'>.
+2025-08-18 09:58:41,527 - ERROR - Error updating component status: Column expression, FROM clause, or other columns clause element expected, got <class 'models.BotStatus'>.
+2025-08-18 09:58:41,527 - ERROR - Error updating component status: Column expression, FROM clause, or other columns clause element expected, got <class 'models.BotStatus'>.
+2025-08-18 09:58:41,527 - ERROR - Error updating component status: Column expression, FROM clause, or other columns clause element expected, got <class 'models.BotStatus'>.
+2025-08-18 09:58:41,527 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 09:58:41,527 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 09:58:41,527 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 09:58:41,537 - INFO - ✅ Successfully loaded 10 H1 candles from MT5
+2025-08-18 09:58:41,538 - INFO - 📈 Price range: $3323.59 - $3358.42
+2025-08-18 09:58:41,538 - INFO - 🕐 Latest: 2025-08-18 09:00:00 - $3349.41
+2025-08-18 09:58:41,538 - INFO - ✅ Successfully got 10 candles from MT5 CSV
+2025-08-18 09:58:41,538 - INFO - 📊 Latest price: $3349.41
+2025-08-18 09:58:41,538 - ERROR - Error getting data for test message: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-08-18 09:58:41,759 - INFO - HTTP Request: POST https://api.telegram.org/bot7522433521:AAF7ugwzUy7k9OPqcGqEv_45hHsG83PpP-Y/sendMessage "HTTP/1.1 200 OK"
+2025-08-18 09:58:41,760 - INFO - Message sent to -1002717718463: 🚀 **ربات تحلیل طلای جهانی - پیام تست**
+
+🤖 **وضعیت سیستم:** آنلاین و آماده
+⏰ **زمان راه‌اندازی:** 202...
+2025-08-18 09:58:41,761 - ERROR - Error generating health report: Column expression, FROM clause, or other columns clause element expected, got <class 'models.BotStatus'>.
+2025-08-18 09:58:41,849 - INFO - HTTP Request: POST https://api.telegram.org/bot7522433521:AAF7ugwzUy7k9OPqcGqEv_45hHsG83PpP-Y/sendMessage "HTTP/1.1 200 OK"
+2025-08-18 09:58:41,850 - INFO - Message sent to 1112066452: 🔧 **گزارش وضعیت سیستم - ادمین**
+
+📊 **امتیاز سلامت:** 0.0%
+⏰ **زمان گزارش:** 2025/08/18 09:58
+
+🔍 **وض...
+2025-08-18 09:58:41,850 - ERROR - Error sending initial test message: 'message_type_name' is an invalid keyword argument for TelegramMessage
+2025-08-18 09:58:41,850 - INFO - Initial test message sent: False
+2025-08-18 09:59:09,196 - ERROR - Error in index route: Column expression, FROM clause, or other columns clause element expected, got <class 'models.Signal'>.
+2025-08-18 09:59:09,217 - INFO - 194.180.207.58 - - [18/Aug/2025 09:59:09] "GET / HTTP/1.1" 200 -
+2025-08-18 09:59:09,403 - INFO - 194.180.207.58 - - [18/Aug/2025 09:59:09] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-08-18 09:59:09,577 - INFO - 194.180.207.58 - - [18/Aug/2025 09:59:09] "GET /static/js/dashboard.js HTTP/1.1" 200 -
+2025-08-18 09:59:10,066 - INFO - 🏗️ Getting M15 data from MT5 CSV files...
+2025-08-18 09:59:10,066 - INFO - 📊 Reading M15 data from MT5 CSV: XAUUSD_M15.csv
+2025-08-18 09:59:10,066 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 09:59:10,078 - INFO - ✅ Successfully loaded 200 M15 candles from MT5
+2025-08-18 09:59:10,080 - INFO - 📈 Price range: $3323.59 - $3368.38
+2025-08-18 09:59:10,080 - INFO - 🕐 Latest: 2025-08-18 09:15:00 - $3349.68
+2025-08-18 09:59:10,081 - INFO - ✅ Successfully got 200 candles from MT5 CSV
+2025-08-18 09:59:10,081 - INFO - 📊 Latest price: $3349.68
+2025-08-18 09:59:10,081 - INFO - Fetched 200 candles for M15
+2025-08-18 09:59:10,081 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 09:59:10,081 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 09:59:10,082 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 09:59:10,089 - INFO - ✅ Successfully loaded 200 H1 candles from MT5
+2025-08-18 09:59:10,089 - INFO - 📈 Price range: $3323.59 - $3408.91
+2025-08-18 09:59:10,089 - INFO - 🕐 Latest: 2025-08-18 09:00:00 - $3349.68
+2025-08-18 09:59:10,089 - INFO - ✅ Successfully got 200 candles from MT5 CSV
+2025-08-18 09:59:10,089 - INFO - 📊 Latest price: $3349.68
+2025-08-18 09:59:10,090 - INFO - Fetched 200 candles for H1
+2025-08-18 09:59:10,090 - INFO - 🏗️ Getting H4 data from MT5 CSV files...
+2025-08-18 09:59:10,090 - INFO - 📊 Reading H4 data from MT5 CSV: XAUUSD_H4.csv
+2025-08-18 09:59:10,090 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 09:59:10,096 - INFO - ✅ Successfully loaded 100 H4 candles from MT5
+2025-08-18 09:59:10,097 - INFO - 📈 Price range: $3268.18 - $3408.91
+2025-08-18 09:59:10,097 - INFO - 🕐 Latest: 2025-08-18 08:00:00 - $3349.68
+2025-08-18 09:59:10,097 - INFO - ✅ Successfully got 100 candles from MT5 CSV
+2025-08-18 09:59:10,097 - INFO - 📊 Latest price: $3349.68
+2025-08-18 09:59:10,097 - INFO - Fetched 100 candles for H4
+2025-08-18 09:59:10,097 - INFO - 🏗️ Getting D1 data from MT5 CSV files...
+2025-08-18 09:59:10,097 - INFO - 📊 Reading D1 data from MT5 CSV: XAUUSD_D1.csv
+2025-08-18 09:59:10,097 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 09:59:10,103 - INFO - ✅ Successfully loaded 50 D1 candles from MT5
+2025-08-18 09:59:10,103 - INFO - 📈 Price range: $3248.34 - $3452.90
+2025-08-18 09:59:10,104 - INFO - 🕐 Latest: 2025-08-18 00:00:00 - $3349.68
+2025-08-18 09:59:10,104 - INFO - ✅ Successfully got 50 candles from MT5 CSV
+2025-08-18 09:59:10,104 - INFO - 📊 Latest price: $3349.68
+2025-08-18 09:59:10,104 - INFO - Fetched 50 candles for D1
+2025-08-18 09:59:10,119 - INFO - ✅ Simple analysis completed: RSI=61.4, Trend=UPTREND
+2025-08-18 09:59:10,119 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 09:59:10,213 - INFO - ✅ Simple analysis completed: RSI=55.5, Trend=UPTREND
+2025-08-18 09:59:10,213 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 09:59:10,381 - INFO - ✅ Simple analysis completed: RSI=39.8, Trend=DOWNTREND
+2025-08-18 09:59:10,381 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 09:59:10,412 - INFO - ✅ Simple analysis completed: RSI=53.8, Trend=UPTREND
+2025-08-18 09:59:10,412 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 09:59:10,425 - INFO - 194.180.207.58 - - [18/Aug/2025 09:59:10] "GET /api/market_status HTTP/1.1" 200 -

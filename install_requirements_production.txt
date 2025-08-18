@@ -1,0 +1,43 @@
+# GoldBot v2.1 Production Requirements - Zero Config Installation
+# Python 3.8+ compatible
+
+# Core Flask dependencies
+flask>=2.3.0
+gunicorn>=21.2.0
+werkzeug>=2.3.0
+
+# Database
+flask-sqlalchemy>=3.0.0
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+
+# Data processing (Fixed versions to avoid conflicts)
+pandas>=2.0.0,<3.0.0
+numpy>=1.24.0,<2.0.0
+
+# Technical Analysis - ONLY TA-Lib for RSI
+TA-Lib>=0.4.25
+
+# Charts and visualization
+plotly>=5.17.0
+
+# Telegram integration
+python-telegram-bot>=20.7
+
+# HTTP requests and web scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+trafilatura==1.6.4  # Fixed version to avoid lxml conflicts
+
+# Scheduling and time
+apscheduler>=3.10.4
+pytz>=2023.3
+
+# Persian date support
+jdatetime>=4.1.0
+
+# Email validation
+email-validator>=2.1.0
+
+# Development and debugging
+python-dotenv>=1.0.0

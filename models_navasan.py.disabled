@@ -1,0 +1,184 @@
+"""
+Database Models for Navasan Price Bot
+مدل‌های پایگاه داده ربات قیمت نوسان
+"""
+
+# This file is deprecated - all models moved to models.py
+# Kept for compatibility but all classes are commented out
+
+
+class PriceRecord(db.Model):
+    """مدل ثبت قیمت‌ها از نوسان"""
+    __tablename__ = 'price_records'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Currency prices
+    usd_sell = db.Column(db.Float)
+    usd_buy = db.Column(db.Float)
+    eur_sell = db.Column(db.Float)
+    eur_buy = db.Column(db.Float)
+    
+    # Gold prices
+    gold_18k = db.Column(db.Float)
+    gold_mesghal = db.Column(db.Float)
+    gold_coin_emami = db.Column(db.Float)
+    gold_coin_bahar = db.Column(db.Float)
+    gold_coin_gerami = db.Column(db.Float)
+    
+    # Crypto prices
+    btc_price = db.Column(db.Float)
+    eth_price = db.Column(db.Float)
+    
+    # Status fields
+    api_status = db.Column(db.String(20), default='SUCCESS')  # SUCCESS, FAILED
+    channel_sent = db.Column(db.Boolean, default=False)
+    retry_count = db.Column(db.Integer, default=0)
+    error_message = db.Column(db.Text)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'usd_sell': self.usd_sell,
+            'usd_buy': self.usd_buy,
+            'eur_sell': self.eur_sell,
+            'eur_buy': self.eur_buy,
+            'gold_18k': self.gold_18k,
+            'gold_mesghal': self.gold_mesghal,
+            'gold_coin_emami': self.gold_coin_emami,
+            'gold_coin_bahar': self.gold_coin_bahar,
+            'gold_coin_gerami': self.gold_coin_gerami,
+            'btc_price': self.btc_price,
+            'eth_price': self.eth_price,
+            'api_status': self.api_status,
+            'channel_sent': self.channel_sent
+        }
+
+
+class BotStatistics(db.Model):
+    """آمار عملکرد ربات"""
+    __tablename__ = 'bot_statistics'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, default=datetime.utcnow().date, nullable=False)
+    
+    # API call statistics
+    total_api_calls = db.Column(db.Integer, default=0)
+    successful_api_calls = db.Column(db.Integer, default=0)
+    failed_api_calls = db.Column(db.Integer, default=0)
+    
+    # Message statistics
+    total_messages_sent = db.Column(db.Integer, default=0)
+    successful_messages = db.Column(db.Integer, default=0)
+    failed_messages = db.Column(db.Integer, default=0)
+    
+    # Price alerts
+    price_alerts_triggered = db.Column(db.Integer, default=0)
+    
+    # Update times
+    last_update = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    @property
+    def api_success_rate(self):
+        if self.total_api_calls == 0:
+            return 0
+        return (self.successful_api_calls / self.total_api_calls) * 100
+    
+    @property
+    def message_success_rate(self):
+        if self.total_messages_sent == 0:
+            return 0
+        return (self.successful_messages / self.total_messages_sent) * 100
+    
+    def to_dict(self):
+        return {
+            'date': self.date.isoformat() if self.date else None,
+            'total_api_calls': self.total_api_calls,
+            'successful_api_calls': self.successful_api_calls,
+            'failed_api_calls': self.failed_api_calls,
+            'api_success_rate': round(self.api_success_rate, 2),
+            'total_messages_sent': self.total_messages_sent,
+            'successful_messages': self.successful_messages,
+            'failed_messages': self.failed_messages,
+            'message_success_rate': round(self.message_success_rate, 2),
+            'price_alerts_triggered': self.price_alerts_triggered,
+            'last_update': self.last_update.isoformat() if self.last_update else None
+        }
+
+
+class NavasanPriceAlert(db.Model):
+    """هشدارهای تغییر قیمت"""
+    __tablename__ = 'navasan_price_alerts'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Alert details
+    asset_name = db.Column(db.String(50), nullable=False)  # USD, EUR, BTC, Gold, etc.
+    previous_price = db.Column(db.Float, nullable=False)
+    current_price = db.Column(db.Float, nullable=False)
+    change_percentage = db.Column(db.Float, nullable=False)
+    alert_type = db.Column(db.String(20), nullable=False)  # INCREASE, DECREASE
+    
+    # Status
+    sent_to_channel = db.Column(db.Boolean, default=False)
+    acknowledged = db.Column(db.Boolean, default=False)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'asset_name': self.asset_name,
+            'previous_price': self.previous_price,
+            'current_price': self.current_price,
+            'change_percentage': self.change_percentage,
+            'alert_type': self.alert_type,
+            'sent_to_channel': self.sent_to_channel,
+            'acknowledged': self.acknowledged
+        }
+
+
+class SystemLog(db.Model):
+    """لاگ‌های سیستم"""
+    __tablename__ = 'system_logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Log details
+    level = db.Column(db.String(10), nullable=False)  # INFO, WARNING, ERROR, DEBUG
+    service = db.Column(db.String(50), nullable=False)  # navasan_bot, scheduler, api, etc.
+    message = db.Column(db.Text, nullable=False)
+    details = db.Column(db.Text)  # JSON string for additional details
+    
+    # Context
+    user_id = db.Column(db.String(50))
+    ip_address = db.Column(db.String(50))
+    request_id = db.Column(db.String(100))
+    
+    def get_details_dict(self):
+        if self.details:
+            try:
+                return json.loads(self.details)
+            except:
+                return {}
+        return {}
+    
+    def set_details_dict(self, data):
+        self.details = json.dumps(data, ensure_ascii=False)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'level': self.level,
+            'service': self.service,
+            'message': self.message,
+            'details': self.get_details_dict(),
+            'user_id': self.user_id,
+            'ip_address': self.ip_address,
+            'request_id': self.request_id
+        }

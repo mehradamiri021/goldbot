@@ -1,0 +1,550 @@
+(venv) trader@srv9533214212:~/goldbot$ source venv/bin/activate
+pip install flask flask-sqlalchemy gunicorn sqlalchemy psycopg2-binary
+pip install python-telegram-bot requests pandas numpy plotly
+pip install apscheduler pytz werkzeug jdatetime beautifulsoup4
+python main.py
+Requirement already satisfied: flask in ./venv/lib/python3.11/site-packages (3.0.0)
+Requirement already satisfied: flask-sqlalchemy in ./venv/lib/python3.11/site-packages (3.1.1)
+Requirement already satisfied: gunicorn in ./venv/lib/python3.11/site-packages (21.2.0)
+Requirement already satisfied: sqlalchemy in ./venv/lib/python3.11/site-packages (2.0.43)
+Collecting psycopg2-binary
+  Using cached psycopg2_binary-2.9.10-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+Requirement already satisfied: Werkzeug>=3.0.0 in ./venv/lib/python3.11/site-packages (from flask) (3.1.3)
+Requirement already satisfied: Jinja2>=3.1.2 in ./venv/lib/python3.11/site-packages (from flask) (3.1.6)
+Requirement already satisfied: itsdangerous>=2.1.2 in ./venv/lib/python3.11/site-packages (from flask) (2.2.0)
+Requirement already satisfied: click>=8.1.3 in ./venv/lib/python3.11/site-packages (from flask) (8.2.1)
+Requirement already satisfied: blinker>=1.6.2 in ./venv/lib/python3.11/site-packages (from flask) (1.9.0)
+Requirement already satisfied: packaging in ./venv/lib/python3.11/site-packages (from gunicorn) (25.0)
+Requirement already satisfied: greenlet>=1 in ./venv/lib/python3.11/site-packages (from sqlalchemy) (3.2.4)
+Requirement already satisfied: typing-extensions>=4.6.0 in ./venv/lib/python3.11/site-packages (from sqlalchemy) (4.14.1)
+Requirement already satisfied: MarkupSafe>=2.0 in ./venv/lib/python3.11/site-packages (from Jinja2>=3.1.2->flask) (3.0.2)
+Using cached psycopg2_binary-2.9.10-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.0 MB)
+Installing collected packages: psycopg2-binary
+Successfully installed psycopg2-binary-2.9.10
+Requirement already satisfied: python-telegram-bot in ./venv/lib/python3.11/site-packages (20.8)
+Requirement already satisfied: requests in ./venv/lib/python3.11/site-packages (2.31.0)
+Requirement already satisfied: pandas in ./venv/lib/python3.11/site-packages (2.3.1)
+Requirement already satisfied: numpy in ./venv/lib/python3.11/site-packages (2.3.2)
+Collecting plotly
+  Using cached plotly-6.3.0-py3-none-any.whl.metadata (8.5 kB)
+Requirement already satisfied: httpx~=0.26.0 in ./venv/lib/python3.11/site-packages (from python-telegram-bot) (0.26.0)
+Requirement already satisfied: anyio in ./venv/lib/python3.11/site-packages (from httpx~=0.26.0->python-telegram-bot) (4.10.0)
+Requirement already satisfied: certifi in ./venv/lib/python3.11/site-packages (from httpx~=0.26.0->python-telegram-bot) (2025.8.3)
+Requirement already satisfied: httpcore==1.* in ./venv/lib/python3.11/site-packages (from httpx~=0.26.0->python-telegram-bot) (1.0.9)
+Requirement already satisfied: idna in ./venv/lib/python3.11/site-packages (from httpx~=0.26.0->python-telegram-bot) (3.10)
+Requirement already satisfied: sniffio in ./venv/lib/python3.11/site-packages (from httpx~=0.26.0->python-telegram-bot) (1.3.1)
+Requirement already satisfied: h11>=0.16 in ./venv/lib/python3.11/site-packages (from httpcore==1.*->httpx~=0.26.0->python-telegram-bot) (0.16.0)
+Requirement already satisfied: charset-normalizer<4,>=2 in ./venv/lib/python3.11/site-packages (from requests) (3.4.3)
+Requirement already satisfied: urllib3<3,>=1.21.1 in ./venv/lib/python3.11/site-packages (from requests) (2.5.0)
+Requirement already satisfied: python-dateutil>=2.8.2 in ./venv/lib/python3.11/site-packages (from pandas) (2.9.0.post0)
+Requirement already satisfied: pytz>=2020.1 in ./venv/lib/python3.11/site-packages (from pandas) (2025.2)
+Requirement already satisfied: tzdata>=2022.7 in ./venv/lib/python3.11/site-packages (from pandas) (2025.2)
+Collecting narwhals>=1.15.1 (from plotly)
+  Using cached narwhals-2.1.2-py3-none-any.whl.metadata (11 kB)
+Requirement already satisfied: packaging in ./venv/lib/python3.11/site-packages (from plotly) (25.0)
+Requirement already satisfied: six>=1.5 in ./venv/lib/python3.11/site-packages (from python-dateutil>=2.8.2->pandas) (1.17.0)
+Requirement already satisfied: typing_extensions>=4.5 in ./venv/lib/python3.11/site-packages (from anyio->httpx~=0.26.0->python-telegram-bot) (4.14.1)
+Using cached plotly-6.3.0-py3-none-any.whl (9.8 MB)
+Using cached narwhals-2.1.2-py3-none-any.whl (392 kB)
+Installing collected packages: narwhals, plotly
+Successfully installed narwhals-2.1.2 plotly-6.3.0
+Collecting apscheduler
+  Using cached APScheduler-3.11.0-py3-none-any.whl.metadata (6.4 kB)
+Requirement already satisfied: pytz in ./venv/lib/python3.11/site-packages (2025.2)
+Requirement already satisfied: werkzeug in ./venv/lib/python3.11/site-packages (3.1.3)
+Requirement already satisfied: jdatetime in ./venv/lib/python3.11/site-packages (5.2.0)
+Collecting beautifulsoup4
+  Using cached beautifulsoup4-4.13.4-py3-none-any.whl.metadata (3.8 kB)
+Collecting tzlocal>=3.0 (from apscheduler)
+  Using cached tzlocal-5.3.1-py3-none-any.whl.metadata (7.6 kB)
+Requirement already satisfied: MarkupSafe>=2.1.1 in ./venv/lib/python3.11/site-packages (from werkzeug) (3.0.2)
+Requirement already satisfied: jalali-core>=1.0 in ./venv/lib/python3.11/site-packages (from jdatetime) (1.0.0)
+Collecting soupsieve>1.2 (from beautifulsoup4)
+  Using cached soupsieve-2.7-py3-none-any.whl.metadata (4.6 kB)
+Requirement already satisfied: typing-extensions>=4.0.0 in ./venv/lib/python3.11/site-packages (from beautifulsoup4) (4.14.1)
+Using cached APScheduler-3.11.0-py3-none-any.whl (64 kB)
+Using cached beautifulsoup4-4.13.4-py3-none-any.whl (187 kB)
+Using cached soupsieve-2.7-py3-none-any.whl (36 kB)
+Using cached tzlocal-5.3.1-py3-none-any.whl (18 kB)
+Installing collected packages: tzlocal, soupsieve, beautifulsoup4, apscheduler
+Successfully installed apscheduler-3.11.0 beautifulsoup4-4.13.4 soupsieve-2.7 tzlocal-5.3.1
+2025-08-18 16:29:06,224 - INFO - ✅ Found MT5 data at default path: /home/trader/.wine_mt5/drive_c/MT5-CX/MQL5/Files
+2025-08-18 16:29:06,224 - INFO - 🏗️ MT5 CSV Reader initialized for path: /home/trader/.wine_mt5/drive_c/MT5-CX/MQL5/Files
+2025-08-18 16:29:06,225 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:06,235 - INFO - ✅ MT5 CSV connection successful - 5 test candles
+2025-08-18 16:29:06,236 - INFO - 📊 Latest candle: 2025-08-18 15:00:00 - Price: $3344.29
+2025-08-18 16:29:06,236 - INFO - ✅ MT5 CSV reader initialized successfully
+2025-08-18 16:29:06,236 - INFO - 🏗️ Using MetaTrader 5 data from Wine installation
+2025-08-18 16:29:06,426 - WARNING - ⚠️ Admin routes not available: cannot import name 'send_message_to_channel' from 'services.telegram_service' (/home/trader/goldbot/services/telegram_service.py)
+2025-08-18 16:29:06,430 - WARNING - /etc/timezone is deprecated in some distros, and no longer reliable. tzlocal is ignoring it, and you can likely delete it.
+2025-08-18 16:29:06,438 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 16:29:06,439 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 16:29:06,439 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 16:29:06,440 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 16:29:06,440 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 16:29:06,440 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 16:29:06,440 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 16:29:06,440 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 16:29:06,440 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 16:29:06,441 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-18 16:29:06,442 - INFO - Added job "🎯 Morning AI Analysis Report (PRIMARY)" to job store "default"
+2025-08-18 16:29:06,442 - INFO - Added job "🎯 Evening AI Analysis Report (PRIMARY)" to job store "default"
+2025-08-18 16:29:06,442 - INFO - Added job "📊 Morning Price Update (11:11) - SECONDARY" to job store "default"
+2025-08-18 16:29:06,444 - INFO - Added job "📊 Afternoon Price Update (14:14) - SECONDARY" to job store "default"
+2025-08-18 16:29:06,445 - INFO - Added job "📊 Evening Price Update (17:17) - SECONDARY" to job store "default"
+2025-08-18 16:29:06,445 - INFO - Added job "Enhanced Daily Admin Report" to job store "default"
+2025-08-18 16:29:06,445 - INFO - Added job "Weekly Comprehensive Report" to job store "default"
+2025-08-18 16:29:06,445 - INFO - Added job "🎯 15-Minute Signal Monitor (PRIMARY)" to job store "default"
+2025-08-18 16:29:06,446 - INFO - Added job "Market Status Check" to job store "default"
+2025-08-18 16:29:06,446 - INFO - Added job "Daily Database Cleanup" to job store "default"
+2025-08-18 16:29:06,446 - INFO - Scheduler started
+2025-08-18 16:29:06,456 - INFO - Scheduler started successfully with all jobs
+2025-08-18 16:29:06,463 - INFO - Component DATA_API status updated to ONLINE
+2025-08-18 16:29:06,465 - INFO - Component TELEGRAM status updated to ONLINE
+2025-08-18 16:29:06,467 - INFO - Component SCHEDULER status updated to ONLINE
+2025-08-18 16:29:06,469 - INFO - Component ANALYSIS status updated to ONLINE
+2025-08-18 16:29:06,469 - INFO - ✅ Price Bot Service skipped to avoid event loop issues
+2025-08-18 16:29:06,472 - INFO - Component TELEGRAM status updated to ONLINE
+2025-08-18 16:29:06,473 - INFO - Gold Trading Bot initialized successfully
+2025-08-18 16:29:06,474 - INFO - Database tables initialized successfully
+2025-08-18 16:29:06,474 - INFO - 🚀 راه‌اندازی ربات تحلیل طلا...
+2025-08-18 16:29:06,474 - INFO - 🚀 Starting Gold Trading Bot...
+2025-08-18 16:29:06,476 - INFO - Database tables initialized successfully
+2025-08-18 16:29:06,476 - INFO - ✅ ربات آماده اجرا در http://0.0.0.0:5000
+2025-08-18 16:29:06,476 - INFO - ✅ Bot ready at http://0.0.0.0:5000
+2025-08-18 16:29:06,740 - INFO - ✅ Admin notification sent successfully
+2025-08-18 16:29:06,741 - INFO - 🚀 Startup notification sent to admin
+2025-08-18 16:29:06,742 - INFO - ✅ Price Bot Service skipped (avoiding async issues)
+2025-08-18 16:29:06,742 - INFO - ✅ Core trading bot systems ready
+ * Serving Flask app 'app'
+ * Debug mode: off
+2025-08-18 16:29:06,743 - INFO - WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://45.195.250.226:5000
+2025-08-18 16:29:06,744 - INFO - Press CTRL+C to quit
+2025-08-18 16:29:20,993 - INFO - 🏗️ Getting M15 data from MT5 CSV files...
+2025-08-18 16:29:20,993 - INFO - 📊 Reading M15 data from MT5 CSV: XAUUSD_M15.csv
+2025-08-18 16:29:20,993 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:21,007 - INFO - ✅ Successfully loaded 500 M15 candles from MT5
+2025-08-18 16:29:21,010 - INFO - 📈 Price range: $3323.59 - $3380.18
+2025-08-18 16:29:21,011 - INFO - 🕐 Latest: 2025-08-18 15:45:00 - $3344.54
+2025-08-18 16:29:21,011 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:21,012 - INFO - 📊 Latest price: $3344.54
+2025-08-18 16:29:21,012 - INFO - Fetched 500 candles for M15
+2025-08-18 16:29:21,012 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 16:29:21,012 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 16:29:21,012 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:21,022 - INFO - ✅ Successfully loaded 500 H1 candles from MT5
+2025-08-18 16:29:21,022 - INFO - 📈 Price range: $3268.18 - $3438.85
+2025-08-18 16:29:21,022 - INFO - 🕐 Latest: 2025-08-18 15:00:00 - $3344.54
+2025-08-18 16:29:21,022 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:21,022 - INFO - 📊 Latest price: $3344.54
+2025-08-18 16:29:21,023 - INFO - Fetched 500 candles for H1
+2025-08-18 16:29:21,023 - INFO - 🏗️ Getting H4 data from MT5 CSV files...
+2025-08-18 16:29:21,023 - INFO - 📊 Reading H4 data from MT5 CSV: XAUUSD_H4.csv
+2025-08-18 16:29:21,023 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:21,030 - INFO - ✅ Successfully loaded 500 H4 candles from MT5
+2025-08-18 16:29:21,030 - INFO - 📈 Price range: $3120.67 - $3452.90
+2025-08-18 16:29:21,031 - INFO - 🕐 Latest: 2025-08-18 12:00:00 - $3344.54
+2025-08-18 16:29:21,031 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:21,031 - INFO - 📊 Latest price: $3344.54
+2025-08-18 16:29:21,031 - INFO - Fetched 500 candles for H4
+2025-08-18 16:29:21,031 - INFO - 🏗️ Getting D1 data from MT5 CSV files...
+2025-08-18 16:29:21,031 - INFO - 📊 Reading D1 data from MT5 CSV: XAUUSD_D1.csv
+2025-08-18 16:29:21,031 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:21,039 - INFO - ✅ Successfully loaded 500 D1 candles from MT5
+2025-08-18 16:29:21,039 - INFO - 📈 Price range: $1810.42 - $3500.07
+2025-08-18 16:29:21,040 - INFO - 🕐 Latest: 2025-08-18 00:00:00 - $3344.54
+2025-08-18 16:29:21,040 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:21,040 - INFO - 📊 Latest price: $3344.54
+2025-08-18 16:29:21,040 - INFO - Fetched 500 candles for D1
+2025-08-18 16:29:21,052 - INFO - ✅ Simple analysis completed: RSI=40.0, Trend=DOWNTREND
+2025-08-18 16:29:21,053 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:21,348 - INFO - ✅ Simple analysis completed: RSI=58.8, Trend=UPTREND
+2025-08-18 16:29:21,349 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:21,957 - INFO - ✅ Simple analysis completed: RSI=41.4, Trend=DOWNTREND
+2025-08-18 16:29:21,957 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:22,267 - INFO - ✅ Simple analysis completed: RSI=53.0, Trend=UPTREND
+2025-08-18 16:29:22,267 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:22,571 - INFO - 194.180.207.58 - - [18/Aug/2025 16:29:22] "GET /api/market_status HTTP/1.1" 200 -
+2025-08-18 16:29:22,672 - ERROR - Error in index route: Column expression, FROM clause, or other columns clause element expected, got <class 'models.Signal'>.
+2025-08-18 16:29:22,689 - INFO - 194.180.207.58 - - [18/Aug/2025 16:29:22] "GET / HTTP/1.1" 200 -
+2025-08-18 16:29:22,968 - INFO - 194.180.207.58 - - [18/Aug/2025 16:29:22] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-08-18 16:29:23,074 - INFO - 194.180.207.58 - - [18/Aug/2025 16:29:23] "GET /static/js/dashboard.js HTTP/1.1" 200 -
+2025-08-18 16:29:23,464 - INFO - 🏗️ Getting M15 data from MT5 CSV files...
+2025-08-18 16:29:23,464 - INFO - 📊 Reading M15 data from MT5 CSV: XAUUSD_M15.csv
+2025-08-18 16:29:23,465 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:23,476 - INFO - ✅ Successfully loaded 500 M15 candles from MT5
+2025-08-18 16:29:23,476 - INFO - 📈 Price range: $3323.59 - $3380.18
+2025-08-18 16:29:23,477 - INFO - 🕐 Latest: 2025-08-18 15:45:00 - $3344.51
+2025-08-18 16:29:23,477 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:23,477 - INFO - 📊 Latest price: $3344.51
+2025-08-18 16:29:23,477 - INFO - Fetched 500 candles for M15
+2025-08-18 16:29:23,477 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 16:29:23,477 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 16:29:23,478 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:23,486 - INFO - ✅ Successfully loaded 500 H1 candles from MT5
+2025-08-18 16:29:23,487 - INFO - 📈 Price range: $3268.18 - $3438.85
+2025-08-18 16:29:23,487 - INFO - 🕐 Latest: 2025-08-18 15:00:00 - $3344.51
+2025-08-18 16:29:23,487 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:23,487 - INFO - 📊 Latest price: $3344.51
+2025-08-18 16:29:23,487 - INFO - Fetched 500 candles for H1
+2025-08-18 16:29:23,488 - INFO - 🏗️ Getting H4 data from MT5 CSV files...
+2025-08-18 16:29:23,488 - INFO - 📊 Reading H4 data from MT5 CSV: XAUUSD_H4.csv
+2025-08-18 16:29:23,488 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:23,495 - INFO - ✅ Successfully loaded 500 H4 candles from MT5
+2025-08-18 16:29:23,495 - INFO - 📈 Price range: $3120.67 - $3452.90
+2025-08-18 16:29:23,495 - INFO - 🕐 Latest: 2025-08-18 12:00:00 - $3344.51
+2025-08-18 16:29:23,495 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:23,495 - INFO - 📊 Latest price: $3344.51
+2025-08-18 16:29:23,496 - INFO - Fetched 500 candles for H4
+2025-08-18 16:29:23,496 - INFO - 🏗️ Getting D1 data from MT5 CSV files...
+2025-08-18 16:29:23,496 - INFO - 📊 Reading D1 data from MT5 CSV: XAUUSD_D1.csv
+2025-08-18 16:29:23,496 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:23,505 - INFO - ✅ Successfully loaded 500 D1 candles from MT5
+2025-08-18 16:29:23,505 - INFO - 📈 Price range: $1810.42 - $3500.07
+2025-08-18 16:29:23,506 - INFO - 🕐 Latest: 2025-08-18 00:00:00 - $3344.51
+2025-08-18 16:29:23,506 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:23,506 - INFO - 📊 Latest price: $3344.51
+2025-08-18 16:29:23,506 - INFO - Fetched 500 candles for D1
+2025-08-18 16:29:23,516 - INFO - ✅ Simple analysis completed: RSI=40.0, Trend=DOWNTREND
+2025-08-18 16:29:23,517 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:23,866 - INFO - ✅ Simple analysis completed: RSI=58.8, Trend=UPTREND
+2025-08-18 16:29:23,866 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:24,451 - INFO - ✅ Simple analysis completed: RSI=41.4, Trend=DOWNTREND
+2025-08-18 16:29:24,451 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:24,748 - INFO - ✅ Simple analysis completed: RSI=53.0, Trend=UPTREND
+2025-08-18 16:29:24,748 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:25,002 - INFO - 194.180.207.58 - - [18/Aug/2025 16:29:25] "GET /api/market_status HTTP/1.1" 200 -
+2025-08-18 16:29:25,057 - ERROR - Error in index route: Column expression, FROM clause, or other columns clause element expected, got <class 'models.Signal'>.
+2025-08-18 16:29:25,058 - INFO - 194.180.207.58 - - [18/Aug/2025 16:29:25] "GET / HTTP/1.1" 200 -
+2025-08-18 16:29:25,434 - INFO - 194.180.207.58 - - [18/Aug/2025 16:29:25] "GET /static/css/style.css HTTP/1.1" 304 -
+2025-08-18 16:29:25,468 - INFO - 194.180.207.58 - - [18/Aug/2025 16:29:25] "GET /static/js/dashboard.js HTTP/1.1" 304 -
+2025-08-18 16:29:25,886 - INFO - 🏗️ Getting M15 data from MT5 CSV files...
+2025-08-18 16:29:25,886 - INFO - 📦 Using cached M15 data
+2025-08-18 16:29:25,886 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:25,887 - INFO - 📊 Latest price: $3344.51
+2025-08-18 16:29:25,887 - INFO - Fetched 500 candles for M15
+2025-08-18 16:29:25,887 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 16:29:25,887 - INFO - 📦 Using cached H1 data
+2025-08-18 16:29:25,887 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:25,888 - INFO - 📊 Latest price: $3344.51
+2025-08-18 16:29:25,888 - INFO - Fetched 500 candles for H1
+2025-08-18 16:29:25,888 - INFO - 🏗️ Getting H4 data from MT5 CSV files...
+2025-08-18 16:29:25,888 - INFO - 📦 Using cached H4 data
+2025-08-18 16:29:25,888 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:25,888 - INFO - 📊 Latest price: $3344.51
+2025-08-18 16:29:25,888 - INFO - Fetched 500 candles for H4
+2025-08-18 16:29:25,888 - INFO - 🏗️ Getting D1 data from MT5 CSV files...
+2025-08-18 16:29:25,888 - INFO - 📦 Using cached D1 data
+2025-08-18 16:29:25,888 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:25,889 - INFO - 📊 Latest price: $3344.51
+2025-08-18 16:29:25,889 - INFO - Fetched 500 candles for D1
+2025-08-18 16:29:25,904 - INFO - ✅ Simple analysis completed: RSI=40.0, Trend=DOWNTREND
+2025-08-18 16:29:25,904 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:26,201 - INFO - ✅ Simple analysis completed: RSI=58.8, Trend=UPTREND
+2025-08-18 16:29:26,201 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:26,746 - INFO - ✅ Simple analysis completed: RSI=41.4, Trend=DOWNTREND
+2025-08-18 16:29:26,746 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:27,052 - INFO - ✅ Simple analysis completed: RSI=53.0, Trend=UPTREND
+2025-08-18 16:29:27,052 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:27,337 - INFO - 194.180.207.58 - - [18/Aug/2025 16:29:27] "GET /api/market_status HTTP/1.1" 200 -
+2025-08-18 16:29:36,441 - INFO - Sending initial test message
+2025-08-18 16:29:36,442 - ERROR - Error updating component status: Column expression, FROM clause, or other columns clause element expected, got <class 'models.BotStatus'>.
+2025-08-18 16:29:36,442 - ERROR - Error updating component status: Column expression, FROM clause, or other columns clause element expected, got <class 'models.BotStatus'>.
+2025-08-18 16:29:36,442 - ERROR - Error updating component status: Column expression, FROM clause, or other columns clause element expected, got <class 'models.BotStatus'>.
+2025-08-18 16:29:36,442 - ERROR - Error updating component status: Column expression, FROM clause, or other columns clause element expected, got <class 'models.BotStatus'>.
+2025-08-18 16:29:36,443 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 16:29:36,443 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 16:29:36,443 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:36,452 - INFO - ✅ Successfully loaded 500 H1 candles from MT5
+2025-08-18 16:29:36,453 - INFO - 📈 Price range: $3268.18 - $3438.85
+2025-08-18 16:29:36,453 - INFO - 🕐 Latest: 2025-08-18 15:00:00 - $3344.67
+2025-08-18 16:29:36,453 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:36,453 - INFO - 📊 Latest price: $3344.67
+2025-08-18 16:29:36,454 - ERROR - Error getting data for test message: -1
+2025-08-18 16:29:36,633 - INFO - HTTP Request: POST https://api.telegram.org/bot7522433521:AAF7ugwzUy7k9OPqcGqEv_45hHsG83PpP-Y/sendMessage "HTTP/1.1 200 OK"
+2025-08-18 16:29:36,636 - INFO - Message sent to -1002717718463: 🚀 **ربات تحلیل طلای جهانی - پیام تست**
+
+🤖 **وضعیت سیستم:** آنلاین و آماده
+⏰ **زمان راه‌اندازی:** 202...
+2025-08-18 16:29:36,637 - ERROR - Error generating health report: Column expression, FROM clause, or other columns clause element expected, got <class 'models.BotStatus'>.
+2025-08-18 16:29:36,689 - INFO - HTTP Request: POST https://api.telegram.org/bot7522433521:AAF7ugwzUy7k9OPqcGqEv_45hHsG83PpP-Y/sendMessage "HTTP/1.1 200 OK"
+2025-08-18 16:29:36,690 - INFO - Message sent to 1112066452: 🔧 **گزارش وضعیت سیستم - ادمین**
+
+📊 **امتیاز سلامت:** 0.0%
+⏰ **زمان گزارش:** 2025/08/18 16:29
+
+🔍 **وض...
+2025-08-18 16:29:36,691 - ERROR - Error sending initial test message: 'message_type_name' is an invalid keyword argument for TelegramMessage
+2025-08-18 16:29:36,691 - INFO - Initial test message sent: False
+2025-08-18 16:29:55,849 - INFO - 🏗️ Getting M15 data from MT5 CSV files...
+2025-08-18 16:29:55,849 - INFO - 📊 Reading M15 data from MT5 CSV: XAUUSD_M15.csv
+2025-08-18 16:29:55,849 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:55,858 - INFO - ✅ Successfully loaded 500 M15 candles from MT5
+2025-08-18 16:29:55,858 - INFO - 📈 Price range: $3323.59 - $3380.18
+2025-08-18 16:29:55,859 - INFO - 🕐 Latest: 2025-08-18 15:45:00 - $3344.44
+2025-08-18 16:29:55,859 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:55,859 - INFO - 📊 Latest price: $3344.44
+2025-08-18 16:29:55,859 - INFO - Fetched 500 candles for M15
+2025-08-18 16:29:55,859 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 16:29:55,859 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 16:29:55,859 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:55,866 - INFO - ✅ Successfully loaded 500 H1 candles from MT5
+2025-08-18 16:29:55,867 - INFO - 📈 Price range: $3268.18 - $3438.85
+2025-08-18 16:29:55,867 - INFO - 🕐 Latest: 2025-08-18 15:00:00 - $3344.44
+2025-08-18 16:29:55,867 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:55,867 - INFO - 📊 Latest price: $3344.44
+2025-08-18 16:29:55,867 - INFO - Fetched 500 candles for H1
+2025-08-18 16:29:55,867 - INFO - 🏗️ Getting H4 data from MT5 CSV files...
+2025-08-18 16:29:55,867 - INFO - 📊 Reading H4 data from MT5 CSV: XAUUSD_H4.csv
+2025-08-18 16:29:55,868 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:55,874 - INFO - ✅ Successfully loaded 500 H4 candles from MT5
+2025-08-18 16:29:55,875 - INFO - 📈 Price range: $3120.67 - $3452.90
+2025-08-18 16:29:55,875 - INFO - 🕐 Latest: 2025-08-18 12:00:00 - $3344.44
+2025-08-18 16:29:55,875 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:55,875 - INFO - 📊 Latest price: $3344.44
+2025-08-18 16:29:55,875 - INFO - Fetched 500 candles for H4
+2025-08-18 16:29:55,875 - INFO - 🏗️ Getting D1 data from MT5 CSV files...
+2025-08-18 16:29:55,875 - INFO - 📊 Reading D1 data from MT5 CSV: XAUUSD_D1.csv
+2025-08-18 16:29:55,875 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:29:55,884 - INFO - ✅ Successfully loaded 500 D1 candles from MT5
+2025-08-18 16:29:55,884 - INFO - 📈 Price range: $1810.42 - $3500.07
+2025-08-18 16:29:55,884 - INFO - 🕐 Latest: 2025-08-18 00:00:00 - $3344.44
+2025-08-18 16:29:55,884 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:29:55,885 - INFO - 📊 Latest price: $3344.44
+2025-08-18 16:29:55,885 - INFO - Fetched 500 candles for D1
+2025-08-18 16:29:55,895 - INFO - ✅ Simple analysis completed: RSI=39.8, Trend=DOWNTREND
+2025-08-18 16:29:55,895 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:56,166 - INFO - ✅ Simple analysis completed: RSI=58.7, Trend=UPTREND
+2025-08-18 16:29:56,166 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:56,716 - INFO - ✅ Simple analysis completed: RSI=41.4, Trend=DOWNTREND
+2025-08-18 16:29:56,716 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:57,020 - INFO - ✅ Simple analysis completed: RSI=53.0, Trend=UPTREND
+2025-08-18 16:29:57,020 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:29:57,297 - INFO - 194.180.207.58 - - [18/Aug/2025 16:29:57] "GET /api/market_status HTTP/1.1" 200 -
+2025-08-18 16:30:00,000 - INFO - Running job "Market Status Check (trigger: cron[minute='*/5'], next run at: 2025-08-18 16:30:00 +0330)" (scheduled at 2025-08-18 16:30:00+03:30)
+2025-08-18 16:30:00,001 - INFO - 🏗️ Getting M15 data from MT5 CSV files...
+2025-08-18 16:30:00,001 - INFO - 📊 Reading M15 data from MT5 CSV: XAUUSD_M15.csv
+2025-08-18 16:30:00,001 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:00,005 - INFO - Running job "🎯 15-Minute Signal Monitor (PRIMARY) (trigger: cron[minute='*/15'], next run at: 2025-08-18 16:30:00 +0330)" (scheduled at 2025-08-18 16:30:00+03:30)
+2025-08-18 16:30:00,005 - INFO - Starting signal monitoring
+2025-08-18 16:30:00,005 - INFO - 🏗️ Getting M15 data from MT5 CSV files...
+2025-08-18 16:30:00,006 - INFO - 📊 Reading M15 data from MT5 CSV: XAUUSD_M15.csv
+2025-08-18 16:30:00,006 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:00,023 - INFO - ✅ Successfully loaded 500 M15 candles from MT5
+2025-08-18 16:30:00,025 - INFO - 📈 Price range: $3323.59 - $3380.18
+2025-08-18 16:30:00,024 - INFO - ✅ Successfully loaded 500 M15 candles from MT5
+2025-08-18 16:30:00,025 - INFO - 📈 Price range: $3323.59 - $3380.18
+2025-08-18 16:30:00,026 - INFO - 🕐 Latest: 2025-08-18 15:45:00 - $3344.65
+2025-08-18 16:30:00,026 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:00,026 - INFO - 📊 Latest price: $3344.65
+2025-08-18 16:30:00,025 - INFO - 🕐 Latest: 2025-08-18 15:45:00 - $3344.65
+2025-08-18 16:30:00,026 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:00,026 - INFO - 📊 Latest price: $3344.65
+2025-08-18 16:30:00,027 - INFO - Fetched 500 candles for M15
+2025-08-18 16:30:00,027 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 16:30:00,027 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 16:30:00,027 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:00,026 - INFO - Fetched 500 candles for M15
+2025-08-18 16:30:00,028 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 16:30:00,028 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 16:30:00,029 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:00,043 - INFO - ✅ Successfully loaded 500 H1 candles from MT5
+2025-08-18 16:30:00,044 - INFO - ✅ Successfully loaded 500 H1 candles from MT5
+2025-08-18 16:30:00,045 - INFO - 📈 Price range: $3268.18 - $3438.85
+2025-08-18 16:30:00,045 - INFO - 🕐 Latest: 2025-08-18 15:00:00 - $3344.65
+2025-08-18 16:30:00,045 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:00,044 - INFO - 📈 Price range: $3268.18 - $3438.85
+2025-08-18 16:30:00,046 - INFO - 🕐 Latest: 2025-08-18 15:00:00 - $3344.65
+2025-08-18 16:30:00,046 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:00,046 - INFO - 📊 Latest price: $3344.65
+2025-08-18 16:30:00,046 - INFO - Fetched 500 candles for H1
+2025-08-18 16:30:00,046 - INFO - 🏗️ Getting H4 data from MT5 CSV files...
+2025-08-18 16:30:00,046 - INFO - 📊 Reading H4 data from MT5 CSV: XAUUSD_H4.csv
+2025-08-18 16:30:00,045 - INFO - 📊 Latest price: $3344.65
+2025-08-18 16:30:00,047 - INFO - Fetched 500 candles for H1
+2025-08-18 16:30:00,047 - INFO - 🏗️ Getting H4 data from MT5 CSV files...
+2025-08-18 16:30:00,047 - INFO - 📊 Reading H4 data from MT5 CSV: XAUUSD_H4.csv
+2025-08-18 16:30:00,047 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:00,048 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:00,070 - INFO - ✅ Successfully loaded 500 H4 candles from MT5
+2025-08-18 16:30:00,073 - INFO - 📈 Price range: $3120.67 - $3452.90
+2025-08-18 16:30:00,073 - INFO - 🕐 Latest: 2025-08-18 12:00:00 - $3344.65
+2025-08-18 16:30:00,073 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:00,073 - INFO - 📊 Latest price: $3344.65
+2025-08-18 16:30:00,074 - INFO - Fetched 500 candles for H4
+2025-08-18 16:30:00,074 - INFO - 🏗️ Getting D1 data from MT5 CSV files...
+2025-08-18 16:30:00,074 - INFO - 📊 Reading D1 data from MT5 CSV: XAUUSD_D1.csv
+2025-08-18 16:30:00,074 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:00,073 - INFO - ✅ Successfully loaded 500 H4 candles from MT5
+2025-08-18 16:30:00,075 - INFO - 📈 Price range: $3120.67 - $3452.90
+2025-08-18 16:30:00,076 - INFO - 🕐 Latest: 2025-08-18 12:00:00 - $3344.65
+2025-08-18 16:30:00,076 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:00,076 - INFO - 📊 Latest price: $3344.65
+2025-08-18 16:30:00,076 - INFO - Fetched 500 candles for H4
+2025-08-18 16:30:00,076 - INFO - 🏗️ Getting D1 data from MT5 CSV files...
+2025-08-18 16:30:00,076 - INFO - 📊 Reading D1 data from MT5 CSV: XAUUSD_D1.csv
+2025-08-18 16:30:00,076 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:00,091 - INFO - ✅ Successfully loaded 500 D1 candles from MT5
+2025-08-18 16:30:00,092 - INFO - ✅ Successfully loaded 500 D1 candles from MT5
+2025-08-18 16:30:00,093 - INFO - 📈 Price range: $1810.42 - $3500.07
+2025-08-18 16:30:00,093 - INFO - 📈 Price range: $1810.42 - $3500.07
+2025-08-18 16:30:00,094 - INFO - 🕐 Latest: 2025-08-18 00:00:00 - $3344.65
+2025-08-18 16:30:00,094 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:00,094 - INFO - 📊 Latest price: $3344.65
+2025-08-18 16:30:00,094 - INFO - Fetched 500 candles for D1
+2025-08-18 16:30:00,093 - INFO - 🕐 Latest: 2025-08-18 00:00:00 - $3344.65
+2025-08-18 16:30:00,096 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:00,096 - INFO - 📊 Latest price: $3344.65
+2025-08-18 16:30:00,096 - INFO - Fetched 500 candles for D1
+2025-08-18 16:30:00,120 - INFO - ✅ Simple analysis completed: RSI=40.2, Trend=DOWNTREND
+2025-08-18 16:30:00,120 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:00,120 - INFO - ✅ Simple analysis completed: RSI=40.2, Trend=DOWNTREND
+2025-08-18 16:30:00,126 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:00,761 - INFO - ✅ Simple analysis completed: RSI=59.0, Trend=UPTREND
+2025-08-18 16:30:00,761 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:00,807 - INFO - ✅ Simple analysis completed: RSI=59.0, Trend=UPTREND
+2025-08-18 16:30:00,808 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:02,024 - INFO - ✅ Simple analysis completed: RSI=41.5, Trend=DOWNTREND
+2025-08-18 16:30:02,025 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:02,086 - INFO - ✅ Simple analysis completed: RSI=41.5, Trend=DOWNTREND
+2025-08-18 16:30:02,093 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:02,642 - INFO - ✅ Simple analysis completed: RSI=53.0, Trend=UPTREND
+2025-08-18 16:30:02,642 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:02,724 - INFO - ✅ Simple analysis completed: RSI=53.0, Trend=UPTREND
+2025-08-18 16:30:02,725 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:03,245 - ERROR - Error in market status check: object of type 'float' has no len()
+2025-08-18 16:30:03,245 - INFO - Job "Market Status Check (trigger: cron[minute='*/5'], next run at: 2025-08-18 16:35:00 +0330)" executed successfully
+2025-08-18 16:30:03,269 - ERROR - Error in signal monitoring: Column expression, FROM clause, or other columns clause element expected, got <class 'models.Signal'>.
+2025-08-18 16:30:03,270 - INFO - Job "🎯 15-Minute Signal Monitor (PRIMARY) (trigger: cron[minute='*/15'], next run at: 2025-08-18 16:45:00 +0330)" executed successfully
+2025-08-18 16:30:16,449 - ERROR - Error in index route: Column expression, FROM clause, or other columns clause element expected, got <class 'models.Signal'>.
+2025-08-18 16:30:16,450 - INFO - 194.180.207.58 - - [18/Aug/2025 16:30:16] "GET / HTTP/1.1" 200 -
+2025-08-18 16:30:16,688 - INFO - 194.180.207.58 - - [18/Aug/2025 16:30:16] "GET /static/css/style.css HTTP/1.1" 304 -
+2025-08-18 16:30:16,899 - INFO - 194.180.207.58 - - [18/Aug/2025 16:30:16] "GET /static/js/dashboard.js HTTP/1.1" 304 -
+2025-08-18 16:30:17,325 - INFO - 🏗️ Getting M15 data from MT5 CSV files...
+2025-08-18 16:30:17,326 - INFO - 📊 Reading M15 data from MT5 CSV: XAUUSD_M15.csv
+2025-08-18 16:30:17,326 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:17,335 - INFO - ✅ Successfully loaded 500 M15 candles from MT5
+2025-08-18 16:30:17,335 - INFO - 📈 Price range: $3323.59 - $3380.18
+2025-08-18 16:30:17,336 - INFO - 🕐 Latest: 2025-08-18 16:00:00 - $3343.98
+2025-08-18 16:30:17,336 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:17,336 - INFO - 📊 Latest price: $3343.98
+2025-08-18 16:30:17,336 - INFO - Fetched 500 candles for M15
+2025-08-18 16:30:17,336 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 16:30:17,336 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 16:30:17,336 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:17,345 - INFO - ✅ Successfully loaded 500 H1 candles from MT5
+2025-08-18 16:30:17,345 - INFO - 📈 Price range: $3268.18 - $3438.85
+2025-08-18 16:30:17,346 - INFO - 🕐 Latest: 2025-08-18 16:00:00 - $3343.98
+2025-08-18 16:30:17,346 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:17,346 - INFO - 📊 Latest price: $3343.98
+2025-08-18 16:30:17,346 - INFO - Fetched 500 candles for H1
+2025-08-18 16:30:17,346 - INFO - 🏗️ Getting H4 data from MT5 CSV files...
+2025-08-18 16:30:17,346 - INFO - 📊 Reading H4 data from MT5 CSV: XAUUSD_H4.csv
+2025-08-18 16:30:17,346 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:17,354 - INFO - ✅ Successfully loaded 500 H4 candles from MT5
+2025-08-18 16:30:17,354 - INFO - 📈 Price range: $3120.67 - $3452.90
+2025-08-18 16:30:17,354 - INFO - 🕐 Latest: 2025-08-18 16:00:00 - $3343.98
+2025-08-18 16:30:17,354 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:17,354 - INFO - 📊 Latest price: $3343.98
+2025-08-18 16:30:17,354 - INFO - Fetched 500 candles for H4
+2025-08-18 16:30:17,354 - INFO - 🏗️ Getting D1 data from MT5 CSV files...
+2025-08-18 16:30:17,354 - INFO - 📊 Reading D1 data from MT5 CSV: XAUUSD_D1.csv
+2025-08-18 16:30:17,355 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:17,361 - INFO - ✅ Successfully loaded 500 D1 candles from MT5
+2025-08-18 16:30:17,361 - INFO - 📈 Price range: $1810.42 - $3500.07
+2025-08-18 16:30:17,361 - INFO - 🕐 Latest: 2025-08-18 00:00:00 - $3343.98
+2025-08-18 16:30:17,361 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:17,362 - INFO - 📊 Latest price: $3343.98
+2025-08-18 16:30:17,362 - INFO - Fetched 500 candles for D1
+2025-08-18 16:30:17,370 - INFO - ✅ Simple analysis completed: RSI=36.7, Trend=DOWNTREND
+2025-08-18 16:30:17,370 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:17,645 - INFO - ✅ Simple analysis completed: RSI=66.6, Trend=UPTREND
+2025-08-18 16:30:17,645 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:18,175 - INFO - ✅ Simple analysis completed: RSI=48.6, Trend=DOWNTREND
+2025-08-18 16:30:18,175 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:18,467 - INFO - ✅ Simple analysis completed: RSI=52.9, Trend=UPTREND
+2025-08-18 16:30:18,467 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:18,725 - INFO - 194.180.207.58 - - [18/Aug/2025 16:30:18] "GET /api/market_status HTTP/1.1" 200 -
+2025-08-18 16:30:23,957 - INFO - 🏗️ Getting M15 data from MT5 CSV files...
+2025-08-18 16:30:23,957 - INFO - 📊 Reading M15 data from MT5 CSV: XAUUSD_M15.csv
+2025-08-18 16:30:23,957 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:23,975 - INFO - ✅ Successfully loaded 500 M15 candles from MT5
+2025-08-18 16:30:23,976 - INFO - 📈 Price range: $3323.59 - $3380.18
+2025-08-18 16:30:23,976 - INFO - 🕐 Latest: 2025-08-18 16:00:00 - $3344.29
+2025-08-18 16:30:23,978 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:23,979 - INFO - 📊 Latest price: $3344.29
+2025-08-18 16:30:23,979 - INFO - Fetched 500 candles for M15
+2025-08-18 16:30:23,979 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 16:30:23,979 - INFO - 📊 Reading H1 data from MT5 CSV: XAUUSD_H1.csv
+2025-08-18 16:30:23,979 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:23,989 - INFO - ✅ Successfully loaded 500 H1 candles from MT5
+2025-08-18 16:30:23,989 - INFO - 📈 Price range: $3268.18 - $3438.85
+2025-08-18 16:30:23,990 - INFO - 🕐 Latest: 2025-08-18 16:00:00 - $3344.29
+2025-08-18 16:30:23,990 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:23,990 - INFO - 📊 Latest price: $3344.29
+2025-08-18 16:30:23,990 - INFO - Fetched 500 candles for H1
+2025-08-18 16:30:23,990 - INFO - 🏗️ Getting H4 data from MT5 CSV files...
+2025-08-18 16:30:23,990 - INFO - 📊 Reading H4 data from MT5 CSV: XAUUSD_H4.csv
+2025-08-18 16:30:23,990 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:24,000 - INFO - ✅ Successfully loaded 500 H4 candles from MT5
+2025-08-18 16:30:24,000 - INFO - 📈 Price range: $3120.67 - $3452.90
+2025-08-18 16:30:24,001 - INFO - 🕐 Latest: 2025-08-18 16:00:00 - $3344.29
+2025-08-18 16:30:24,001 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:24,001 - INFO - 📊 Latest price: $3344.29
+2025-08-18 16:30:24,001 - INFO - Fetched 500 candles for H4
+2025-08-18 16:30:24,001 - INFO - 🏗️ Getting D1 data from MT5 CSV files...
+2025-08-18 16:30:24,001 - INFO - 📊 Reading D1 data from MT5 CSV: XAUUSD_D1.csv
+2025-08-18 16:30:24,002 - INFO - 📋 Detected CSV header, skipping first row: time;open;high;low;close;tick_volume
+2025-08-18 16:30:24,011 - INFO - ✅ Successfully loaded 500 D1 candles from MT5
+2025-08-18 16:30:24,011 - INFO - 📈 Price range: $1810.42 - $3500.07
+2025-08-18 16:30:24,012 - INFO - 🕐 Latest: 2025-08-18 00:00:00 - $3344.29
+2025-08-18 16:30:24,012 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:24,012 - INFO - 📊 Latest price: $3344.29
+2025-08-18 16:30:24,012 - INFO - Fetched 500 candles for D1
+2025-08-18 16:30:24,023 - INFO - ✅ Simple analysis completed: RSI=37.2, Trend=DOWNTREND
+2025-08-18 16:30:24,023 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:24,371 - INFO - ✅ Simple analysis completed: RSI=67.0, Trend=UPTREND
+2025-08-18 16:30:24,371 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:25,053 - INFO - ✅ Simple analysis completed: RSI=48.8, Trend=DOWNTREND
+2025-08-18 16:30:25,053 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:25,351 - INFO - ✅ Simple analysis completed: RSI=53.0, Trend=UPTREND
+2025-08-18 16:30:25,351 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:25,370 - ERROR - Error in index route: Column expression, FROM clause, or other columns clause element expected, got <class 'models.Signal'>.
+2025-08-18 16:30:25,370 - INFO - 194.180.207.58 - - [18/Aug/2025 16:30:25] "GET / HTTP/1.1" 200 -
+2025-08-18 16:30:25,629 - INFO - 194.180.207.58 - - [18/Aug/2025 16:30:25] "GET /api/market_status HTTP/1.1" 200 -
+2025-08-18 16:30:25,848 - INFO - 194.180.207.58 - - [18/Aug/2025 16:30:25] "GET /static/js/dashboard.js HTTP/1.1" 304 -
+2025-08-18 16:30:25,849 - INFO - 194.180.207.58 - - [18/Aug/2025 16:30:25] "GET /static/css/style.css HTTP/1.1" 304 -
+2025-08-18 16:30:26,090 - INFO - 🏗️ Getting M15 data from MT5 CSV files...
+2025-08-18 16:30:26,090 - INFO - 📦 Using cached M15 data
+2025-08-18 16:30:26,090 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:26,090 - INFO - 📊 Latest price: $3344.29
+2025-08-18 16:30:26,091 - INFO - Fetched 500 candles for M15
+2025-08-18 16:30:26,091 - INFO - 🏗️ Getting H1 data from MT5 CSV files...
+2025-08-18 16:30:26,091 - INFO - 📦 Using cached H1 data
+2025-08-18 16:30:26,091 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:26,091 - INFO - 📊 Latest price: $3344.29
+2025-08-18 16:30:26,091 - INFO - Fetched 500 candles for H1
+2025-08-18 16:30:26,091 - INFO - 🏗️ Getting H4 data from MT5 CSV files...
+2025-08-18 16:30:26,091 - INFO - 📦 Using cached H4 data
+2025-08-18 16:30:26,091 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:26,092 - INFO - 📊 Latest price: $3344.29
+2025-08-18 16:30:26,092 - INFO - Fetched 500 candles for H4
+2025-08-18 16:30:26,092 - INFO - 🏗️ Getting D1 data from MT5 CSV files...
+2025-08-18 16:30:26,092 - INFO - 📦 Using cached D1 data
+2025-08-18 16:30:26,092 - INFO - ✅ Successfully got 500 candles from MT5 CSV
+2025-08-18 16:30:26,092 - INFO - 📊 Latest price: $3344.29
+2025-08-18 16:30:26,092 - INFO - Fetched 500 candles for D1
+2025-08-18 16:30:26,103 - INFO - ✅ Simple analysis completed: RSI=37.2, Trend=DOWNTREND
+2025-08-18 16:30:26,103 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:26,392 - INFO - ✅ Simple analysis completed: RSI=67.0, Trend=UPTREND
+2025-08-18 16:30:26,392 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:27,078 - INFO - ✅ Simple analysis completed: RSI=48.8, Trend=DOWNTREND
+2025-08-18 16:30:27,078 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:27,348 - INFO - ✅ Simple analysis completed: RSI=53.0, Trend=UPTREND
+2025-08-18 16:30:27,348 - INFO - ✅ Using custom pattern detection (no TA-Lib)
+2025-08-18 16:30:27,635 - INFO - 194.180.207.58 - - [18/Aug/2025 16:30:27] "GET /api/market_status HTTP/1.1" 200 -
+^C(venv) trader@srv9533214212:~/goldbot$ ^C
+(venv) trader@srv9533214212:~/goldbot$ 

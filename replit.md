@@ -44,15 +44,15 @@ The platform serves Persian/Farsi-speaking users with automated market analysis,
 - ✅ **Real-time Updates**: 10-second refresh with animations working
 - ✅ **Complete Documentation**: Server fix guides and recovery procedures
 
-## Latest Changes - Real-time Monitoring System (August 18, 2025)
-- ✅ **REAL-TIME DATA MONITORING**: Implemented services/real_time_monitor.py for live data tracking
-- ✅ **ADMIN REPORTING**: Automatic admin notifications when Navasan API and Telegram channel data updates
-- ✅ **WEB CONSOLE LIVE STATUS**: Added /api/real_time_status endpoint for live data display
-- ✅ **BACKGROUND MONITORING**: 30-second interval checks for MT5, Navasan API, and @ZaryaalGold channel
-- ✅ **STATUS INDICATORS**: Real-time status badges in web interface (no more question marks)
-- ✅ **DATA UPDATE NOTIFICATIONS**: Admin receives reports when new data is received and processed
-- ✅ **LIVE PRICE UPDATES**: Web console shows actual prices instead of placeholder values
-- ✅ **MONITORING INTEGRATION**: Real-time monitor started automatically with main application
+## Latest Changes - API Rate Limiting Fixed v2.1 (August 18, 2025)
+- ✅ **CRITICAL API RATE LIMITING FIXED**: Eliminated 429 errors by removing continuous API calls
+- ✅ **STARTUP-ONLY DATA UPDATES**: System updates data only on startup and scheduled times (NO continuous monitoring)
+- ✅ **WEB CONSOLE ERROR-FREE**: Fixed /api/real_time_status endpoint to use cached data only
+- ✅ **LIVE MT5 DATA MAINTAINED**: MT5 price data remains real-time while other APIs scheduled only
+- ✅ **SCHEDULED PRICE ANNOUNCEMENTS**: Daily updates at 11:11, 14:14, 17:17 Tehran time only
+- ✅ **ADMIN REPORTING**: Admin receives notifications only when scheduled data updates occur
+- ✅ **CACHE-BASED STATUS**: Web interface shows status from cached data (prevents rate limiting)
+- ✅ **PRODUCTION PACKAGE v2.1**: goldbot_v2.1_RATE_LIMITING_FIXED_20250818_152211.tar.gz (1.54MB)
 
 ## Previous Changes - GoldBot v2.0 (August 18, 2025)
 - ✅ **Telegram Service Fix**: Fixed message_type parameter errors

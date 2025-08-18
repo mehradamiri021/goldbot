@@ -1,0 +1,49 @@
+# Zero-Config Installation Requirements - No Dependency Conflicts
+# تاریخ: 17 آگوست 2025 - نسخه بدون تداخل
+
+# Core Flask - Compatible versions
+Flask>=3.0.0,<4.0.0
+flask-sqlalchemy>=3.1.0,<4.0.0
+Werkzeug>=3.0.0,<4.0.0
+
+# Database - Stable versions
+SQLAlchemy>=2.0.20,<3.0.0
+psycopg2-binary>=2.9.7
+
+# Data Processing - No conflicts
+pandas>=2.1.0,<3.0.0
+numpy>=1.24.0,<2.0.0
+
+# Visualization
+plotly>=5.15.0
+
+# HTTP & API - Latest compatible
+requests>=2.31.0
+urllib3>=2.0.0
+
+# Telegram Bot - Latest stable
+python-telegram-bot>=20.7
+
+# Scheduler & Time
+apscheduler>=3.10.0
+pytz>=2023.3
+
+# Web Scraping - DEPENDENCY CONFLICT RESOLVED
+beautifulsoup4>=4.12.0
+# Remove exact version pinning to let pip resolve
+trafilatura>=1.6.0
+lxml>=4.9.4
+
+# Server
+gunicorn>=21.0.0
+
+# Environment & Utils
+python-dotenv>=1.0.0
+python-dateutil>=2.8.0
+
+# Optional TA-Lib alternative (automatically handled in code)
+pandas-ta>=0.3.14
+
+# Additional dependencies for stability
+jdatetime>=5.0.0
+email-validator>=2.1.0
