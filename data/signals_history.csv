@@ -1,0 +1,6 @@
+id,timestamp,symbol,signal_type,entry_price,stop_loss,take_profit,timeframe,pattern,confidence,status,admin_approved,executed_at,result,profit_loss,smc_analysis,created_date
+1,2024-08-11 09:15:00,XAUUSD,BUY,2650.25,2645.50,2658.75,H1,RSI_REVERSAL,0.75,approved,true,2024-08-11 09:20:00,pending,0.0,"{""order_blocks"": 2, ""bos_signal"": null}",2024-08-11
+2,2024-08-11 10:30:00,XAUUSD,SELL,2652.80,2657.20,2645.30,M15,SHOOTING_STAR,0.68,rejected,false,,,,"{""fvg_count"": 1}",2024-08-11
+3,2024-08-11 12:45:00,XAUUSD,BUY,2648.90,2644.10,2657.40,H4,ORDER_BLOCK,0.82,approved,true,2024-08-11 12:50:00,win,8.50,"{""order_blocks"": 3, ""market_structure"": ""BULLISH""}",2024-08-11
+4,2024-08-11 14:20:00,XAUUSD,SELL,2655.40,2660.15,2647.85,H1,BOS,0.79,approved,true,2024-08-11 14:25:00,pending,0.0,"{""bos_signal"": {""type"": ""Bearish BOS""}}",2024-08-11
+5,2024-08-11 16:10:00,XAUUSD,BUY,2649.75,2645.25,2657.25,M15,HAMMER,0.65,pending,false,,,,"{""liquidity_zones"": 2}",2024-08-11

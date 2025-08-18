@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت - Smart Money Bot</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-coins text-warning me-2"></i>
+                ربات تحلیل طلای جهانی
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>خانه</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard"><i class="fas fa-chart-line me-1"></i>داشبورد</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/signals"><i class="fas fa-signal me-1"></i>سیگنال‌ها</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin"><i class="fas fa-cog me-1"></i>مدیریت</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            خطا: {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2>
+                        <i class="fas fa-shield-alt text-warning me-2"></i>
+                        پنل مدیریت
+                    </h2>
+                    <div>
+                        <button class="btn btn-success me-2" onclick="refreshPendingSignals()">
+                            <i class="fas fa-sync-alt me-1"></i>
+                            بروزرسانی
+                        </button>
+                        <span class="badge bg-info fs-6">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ pending_signals|length if pending_signals else 0 }} سیگنال در انتظار
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-eye fa-2x mb-2"></i>
+                        <h6>نظارت لحظه‌ای</h6>
+                        <button class="btn btn-light btn-sm" onclick="showLiveMonitoring()">
+                            مشاهده
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-paper-plane fa-2x mb-2"></i>
+                        <h6>ارسال دستی گزارش</h6>
+                        <button class="btn btn-light btn-sm" onclick="sendManualReport()">
+                            ارسال
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body text-center">
+                        <i class="fas fa-cogs fa-2x mb-2"></i>
+                        <h6>تنظیمات سیستم</h6>
+                        <button class="btn btn-dark btn-sm" onclick="showSystemSettings()">
+                            تنظیمات
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-download fa-2x mb-2"></i>
+                        <h6>دانلود گزارش‌ها</h6>
+                        <button class="btn btn-light btn-sm" onclick="downloadReports()">
+                            دانلود
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Signals for Approval -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            سیگنال‌های در انتظار تأیید
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if pending_signals %}
+                        <div class="row">
+                            {% for signal in pending_signals %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-{{ 'success' if signal.signal_type == 'BUY' else 'danger' }}">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-{{ 'success' if signal.signal_type == 'BUY' else 'danger' }} fs-6">
+                                            <i class="fas fa-arrow-{{ 'up' if signal.signal_type == 'BUY' else 'down' }} me-1"></i>
+                                            {{ signal.signal_type }}
+                                        </span>
+                                        <small class="text-muted">
+                                            {{ signal.created_at.strftime('%H:%M:%S') if signal.created_at else '--' }}
+                                        </small>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-6">
+                                                <strong>قیمت ورود:</strong><br>
+                                                <span class="h5 text-primary">${{ "%.2f"|format(signal.entry_price) if signal.entry_price else '--' }}</span>
+                                            </div>
+                                            <div class="col-6">
+                                                <strong>درجه اعتماد:</strong><br>
+                                                {% if signal.confidence %}
+                                                    {% set confidence_percent = (signal.confidence * 100)|int %}
+                                                    <span class="h5 text-{{ 'success' if confidence_percent >= 80 else 'warning' if confidence_percent >= 60 else 'secondary' }}">
+                                                        {{ confidence_percent }}%
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-muted">--</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-6">
+                                                <small class="text-muted">Stop Loss:</small><br>
+                                                <strong>${{ "%.2f"|format(signal.stop_loss) if signal.stop_loss else '--' }}</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Take Profit:</small><br>
+                                                <strong>${{ "%.2f"|format(signal.take_profit) if signal.take_profit else '--' }}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <small class="text-muted">الگو شناسایی شده:</small><br>
+                                            <span class="badge bg-info">{{ signal.pattern or 'نامشخص' }}</span>
+                                            <span class="badge bg-secondary ms-1">{{ signal.timeframe or 'H1' }}</span>
+                                        </div>
+
+                                        {% if signal.entry_price and signal.stop_loss and signal.take_profit %}
+                                            {% set risk = (signal.entry_price - signal.stop_loss) if signal.signal_type == 'BUY' else (signal.stop_loss - signal.entry_price) %}
+                                            {% set reward = (signal.take_profit - signal.entry_price) if signal.signal_type == 'BUY' else (signal.entry_price - signal.take_profit) %}
+                                            {% if risk > 0 %}
+                                            <div class="mb-3">
+                                                <small class="text-muted">نسبت ریسک/ریوارد:</small><br>
+                                                <span class="badge bg-info fs-6">1:{{ "%.1f"|format(reward/risk) }}</span>
+                                            </div>
+                                            {% endif %}
+                                        {% endif %}
+
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                            <button class="btn btn-success" onclick="approveSignal({{ signal.id }})">
+                                                <i class="fas fa-check me-1"></i>تأیید و ارسال
+                                            </button>
+                                            <button class="btn btn-danger" onclick="rejectSignal({{ signal.id }})">
+                                                <i class="fas fa-times me-1"></i>رد کردن
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-check-circle fa-3x mb-3 opacity-50"></i>
+                            <h5>هیچ سیگنالی در انتظار تأیید نیست</h5>
+                            <p>تمامی سیگنال‌های ارسالی بررسی شده‌اند.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-heartbeat text-success me-2"></i>
+                            وضعیت سیستم
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-robot text-primary me-2"></i>
+                                    <div>
+                                        <small class="text-muted">ربات تحلیل:</small><br>
+                                        <span class="badge bg-success">فعال</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fab fa-telegram text-info me-2"></i>
+                                    <div>
+                                        <small class="text-muted">تلگرام:</small><br>
+                                        <span class="badge bg-success">متصل</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-database text-warning me-2"></i>
+                                    <div>
+                                        <small class="text-muted">پایگاه داده:</small><br>
+                                        <span class="badge bg-success">آنلاین</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-clock text-secondary me-2"></i>
+                                    <div>
+                                        <small class="text-muted">زمان‌بند:</small><br>
+                                        <span class="badge bg-success">فعال</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calendar-alt text-info me-2"></i>
+                            برنامه گزارش‌دهی
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-sun text-warning me-2"></i>
+                                    گزارش صبحانه
+                                </div>
+                                <span class="badge bg-primary">09:09</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-clock text-info me-2"></i>
+                                    گزارش ادمین
+                                </div>
+                                <span class="badge bg-primary">12:00</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-moon text-secondary me-2"></i>
+                                    گزارش عصر
+                                </div>
+                                <span class="badge bg-primary">15:15</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-calendar-week text-success me-2"></i>
+                                    گزارش هفتگی
+                                </div>
+                                <span class="badge bg-primary">یکشنبه 12:12</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Log -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-history text-secondary me-2"></i>
+                            گزارش فعالیت اخیر
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="activity-log" class="list-group list-group-flush">
+                            <!-- Activity items will be loaded here -->
+                            <div class="text-center text-muted py-3">
+                                <i class="fas fa-spinner fa-spin me-2"></i>
+                                در حال بارگذاری...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Monitoring Modal -->
+    <div class="modal fade" id="liveMonitoringModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-eye text-primary me-2"></i>
+                        نظارت لحظه‌ای بازار
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="liveMonitoringContent">
+                    <!-- Live monitoring content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Settings Modal -->
+    <div class="modal fade" id="systemSettingsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-cogs text-warning me-2"></i>
+                        تنظیمات سیستم
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="systemSettingsContent">
+                    <!-- Settings content -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">لغو</button>
+                    <button type="button" class="btn btn-primary">ذخیره تغییرات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>پنل مدیریت ربات طلای جهانی</h6>
+                    <p class="small text-muted">کنترل کامل بر سیستم تحلیل و سیگنال‌دهی</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="small text-muted">
+                        دسترسی مدیریتی محدود<br>
+                        امنیت بالا - ورود تأیید شده
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    
+    <script>
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            loadActivityLog();
+            
+            // Auto refresh pending signals every 2 minutes
+            setInterval(refreshPendingSignals, 120000);
+        });
+
+        function refreshPendingSignals() {
+            window.location.reload();
+        }
+
+        function approveSignal(signalId) {
+            if (confirm('آیا از تأیید و ارسال این سیگنال به کانال اطمینان دارید؟')) {
+                fetch(`/api/approve_signal/${signalId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('سیگنال تأیید شد و به کانال ارسال گردید!');
+                        window.location.reload();
+                    } else {
+                        alert('خطا در تأیید سیگنال: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('خطا در ارتباط با سرور');
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        function rejectSignal(signalId) {
+            if (confirm('آیا از رد این سیگنال اطمینان دارید؟')) {
+                fetch(`/api/reject_signal/${signalId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('سیگنال رد شد');
+                        window.location.reload();
+                    } else {
+                        alert('خطا در رد سیگنال: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('خطا در ارتباط با سرور');
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        function showLiveMonitoring() {
+            document.getElementById('liveMonitoringContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>قیمت فعلی طلا:</h6>
+                        <h3 class="text-warning" id="live-price">در حال بارگذاری...</h3>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>آخرین سیگنال:</h6>
+                        <span id="last-signal" class="badge bg-info">در حال بررسی...</span>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <h6>نمودار زنده:</h6>
+                        <div class="bg-dark rounded p-3 text-center">
+                            <i class="fas fa-chart-line fa-3x text-muted"></i>
+                            <p class="mt-2 text-muted">نمودار زنده در حال توسعه</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('liveMonitoringModal'));
+            modal.show();
+            
+            // Load live data
+            loadLiveData();
+        }
+
+        function loadLiveData() {
+            fetch('/api/market_status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.current_price) {
+                        document.getElementById('live-price').textContent = '$' + data.current_price.toFixed(2);
+                    }
+                })
+                .catch(error => console.log('Error loading live data:', error));
+        }
+
+        function sendManualReport() {
+            if (confirm('آیا گزارش دستی را به کانال ارسال کنیم؟')) {
+                alert('عملیات ارسال گزارش دستی در حال توسعه است');
+            }
+        }
+
+        function showSystemSettings() {
+            document.getElementById('systemSettingsContent').innerHTML = `
+                <div class="row">
+                    <div class="col-12">
+                        <h6>تنظیمات کلی:</h6>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="autoSignals" checked>
+                            <label class="form-check-label" for="autoSignals">
+                                سیگنال‌دهی خودکار
+                            </label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="autoReports" checked>
+                            <label class="form-check-label" for="autoReports">
+                                گزارش‌دهی خودکار
+                            </label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">حداقل درجه اعتماد برای سیگنال:</label>
+                            <input type="range" class="form-range" min="50" max="95" value="70" id="confidenceThreshold">
+                            <span id="confidenceValue">70%</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('systemSettingsModal'));
+            modal.show();
+            
+            // Add event listener for range slider
+            document.getElementById('confidenceThreshold').addEventListener('input', function() {
+                document.getElementById('confidenceValue').textContent = this.value + '%';
+            });
+        }
+
+        function downloadReports() {
+            alert('عملیات دانلود گزارش‌ها در حال توسعه است');
+        }
+
+        function loadActivityLog() {
+            const activityLog = document.getElementById('activity-log');
+            
+            setTimeout(() => {
+                activityLog.innerHTML = `
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                سیگنال خرید تأیید شد
+                            </h6>
+                            <small>5 دقیقه پیش</small>
+                        </div>
+                        <p class="mb-1">سیگنال خرید XAUUSD در قیمت $2,650 تأیید و به کانال ارسال شد</p>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="fas fa-paper-plane text-info me-2"></i>
+                                گزارش صبحانه ارسال شد
+                            </h6>
+                            <small>2 ساعت پیش</small>
+                        </div>
+                        <p class="mb-1">گزارش تحلیل صبحانه با موفقیت به کانال ارسال گردید</p>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="fas fa-times-circle text-danger me-2"></i>
+                                سیگنال فروش رد شد
+                            </h6>
+                            <small>3 ساعت پیش</small>
+                        </div>
+                        <p class="mb-1">سیگنال فروش به دلیل درجه اعتماد پایین رد شد</p>
+                    </div>
+                `;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد تحلیل طلا - Smart Money Bot</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-coins text-warning me-2"></i>
+                ربات تحلیل طلای جهانی
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>خانه</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard"><i class="fas fa-chart-line me-1"></i>داشبورد</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/signals"><i class="fas fa-signal me-1"></i>سیگنال‌ها</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin"><i class="fas fa-cog me-1"></i>مدیریت</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            خطا: {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Performance Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary">
+                    <div class="card-body text-center">
+                        <i class="fas fa-signal fa-2x mb-2"></i>
+                        <h3 class="mb-1">{{ stats.total_signals or 0 }}</h3>
+                        <p class="mb-0">کل سیگنال‌ها</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h3 class="mb-1">{{ stats.approved_signals or 0 }}</h3>
+                        <p class="mb-0">سیگنال‌های تأیید شده</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info">
+                    <div class="card-body text-center">
+                        <i class="fas fa-trophy fa-2x mb-2"></i>
+                        <h3 class="mb-1">%{{ stats.win_rate or 0 }}</h3>
+                        <p class="mb-0">نرخ موفقیت</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning">
+                    <div class="card-body text-center">
+                        <i class="fas fa-brain fa-2x mb-2"></i>
+                        <h3 class="mb-1">{{ stats.analyses_count or 0 }}</h3>
+                        <p class="mb-0">تحلیل‌های انجام شده</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-line text-primary me-2"></i>
+                            نمودار عملکرد سیگنال‌ها (30 روز اخیر)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="signalsChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-pie-chart text-success me-2"></i>
+                            توزیع نوع سیگنال‌ها
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="signalTypesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market Analysis Dashboard -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-brain text-info me-2"></i>
+                            Smart Money Concepts
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="smc-indicators">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="border-start border-4 border-success ps-3 mb-3">
+                                        <h6 class="mb-1">Order Blocks</h6>
+                                        <small class="text-muted" id="order-blocks-count">در حال بارگذاری...</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border-start border-4 border-warning ps-3 mb-3">
+                                        <h6 class="mb-1">Fair Value Gaps</h6>
+                                        <small class="text-muted" id="fvg-count">در حال بارگذاری...</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border-start border-4 border-info ps-3 mb-3">
+                                        <h6 class="mb-1">Market Structure</h6>
+                                        <small class="text-muted" id="market-structure">در حال بارگذاری...</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border-start border-4 border-danger ps-3 mb-3">
+                                        <h6 class="mb-1">BOS Signal</h6>
+                                        <small class="text-muted" id="bos-signal">در حال بارگذاری...</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-bar text-warning me-2"></i>
+                            اندیکاتورهای تکنیکال
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="technical-indicators">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>RSI:</span>
+                                <span id="rsi-value" class="badge bg-secondary">--</span>
+                            </div>
+                            <div class="progress mb-3" style="height: 8px;">
+                                <div id="rsi-progress" class="progress-bar" role="progressbar" style="width: 50%"></div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>MACD:</span>
+                                <span id="macd-signal" class="badge bg-secondary">--</span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Bollinger Position:</span>
+                                <span id="bb-position" class="badge bg-secondary">--</span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Overall Trend:</span>
+                                <span id="trend-direction" class="badge bg-secondary">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Analyses -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-history text-secondary me-2"></i>
+                            آخرین تحلیل‌ها
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if analyses %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>نوع</th>
+                                        <th>تایم فریم</th>
+                                        <th>قیمت</th>
+                                        <th>روند</th>
+                                        <th>توصیه</th>
+                                        <th>زمان</th>
+                                        <th>ارسال</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for analysis in analyses %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-info">{{ analysis.analysis_type }}</span>
+                                        </td>
+                                        <td>{{ analysis.timeframe or '--' }}</td>
+                                        <td>
+                                            {% if analysis.price %}
+                                                ${{ "%.2f"|format(analysis.price) }}
+                                            {% else %}
+                                                --
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if analysis.trend == 'BULLISH' %}
+                                                <span class="text-success"><i class="fas fa-arrow-up me-1"></i>صعودی</span>
+                                            {% elif analysis.trend == 'BEARISH' %}
+                                                <span class="text-danger"><i class="fas fa-arrow-down me-1"></i>نزولی</span>
+                                            {% else %}
+                                                <span class="text-warning"><i class="fas fa-minus me-1"></i>خنثی</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>{{ (analysis.recommendation[:50] + '...') if analysis.recommendation and analysis.recommendation|length > 50 else (analysis.recommendation or '--') }}</small>
+                                        </td>
+                                        <td>{{ analysis.created_at.strftime('%m/%d %H:%M') if analysis.created_at else '--' }}</td>
+                                        <td>
+                                            {% if analysis.sent_to_telegram %}
+                                                <i class="fas fa-check text-success" title="ارسال شده"></i>
+                                            {% else %}
+                                                <i class="fas fa-times text-danger" title="ارسال نشده"></i>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-chart-line fa-3x mb-3 opacity-50"></i>
+                            <p>هنوز تحلیلی انجام نشده است</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>داشبورد تحلیل طلای جهانی</h6>
+                    <p class="small text-muted">نظارت و کنترل عملکرد سیستم تحلیل هوشمند</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="small text-muted">
+                        بروزرسانی خودکار هر 5 دقیقه<br>
+                        آخرین بروزرسانی: <span id="last-update-time">--:--</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            loadChartData();
+            loadMarketData();
+            
+            // Auto refresh every 5 minutes
+            setInterval(function() {
+                loadMarketData();
+                updateLastUpdateTime();
+            }, 300000);
+        });
+
+        function initializeDashboard() {
+            // Initialize empty charts
+            const signalsCtx = document.getElementById('signalsChart').getContext('2d');
+            window.signalsChart = new Chart(signalsCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'سیگنال‌های روزانه',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            const typesCtx = document.getElementById('signalTypesChart').getContext('2d');
+            window.signalTypesChart = new Chart(typesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['خرید', 'فروش'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#28a745', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadChartData() {
+            fetch('/api/signals_chart_data')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.error) {
+                        updateSignalsChart(data);
+                    }
+                })
+                .catch(error => console.log('خطا در بارگذاری نمودار:', error));
+        }
+
+        function updateSignalsChart(data) {
+            const dates = Object.keys(data).sort();
+            const totals = dates.map(date => data[date].total);
+            const approved = dates.map(date => data[date].approved);
+            
+            window.signalsChart.data.labels = dates.map(date => {
+                const d = new Date(date);
+                return d.toLocaleDateString('fa-IR', {month: 'short', day: 'numeric'});
+            });
+            
+            window.signalsChart.data.datasets = [
+                {
+                    label: 'کل سیگنال‌ها',
+                    data: totals,
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    tension: 0.1
+                },
+                {
+                    label: 'تأیید شده',
+                    data: approved,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    tension: 0.1
+                }
+            ];
+            
+            window.signalsChart.update();
+            
+            // Update signal types chart
+            const totalBuy = Object.values(data).reduce((sum, day) => sum + (day.wins || 0), 0);
+            const totalSell = Object.values(data).reduce((sum, day) => sum + (day.approved - (day.wins || 0)), 0);
+            
+            window.signalTypesChart.data.datasets[0].data = [totalBuy, totalSell];
+            window.signalTypesChart.update();
+        }
+
+        function loadMarketData() {
+            fetch('/api/market_status')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.error) {
+                        updateSMCIndicators(data.smc_analysis || {});
+                        updateTechnicalIndicators(data);
+                    }
+                })
+                .catch(error => console.log('خطا در بارگذاری داده‌ها:', error));
+        }
+
+        function updateSMCIndicators(smcData) {
+            const orderBlocks = smcData.order_blocks || [];
+            const fvgs = smcData.fair_value_gaps || [];
+            const marketStructure = smcData.market_structure || {};
+            const bosSignal = smcData.bos_signal;
+            
+            document.getElementById('order-blocks-count').textContent = `${orderBlocks.length} بلاک فعال`;
+            document.getElementById('fvg-count').textContent = `${fvgs.length} گپ شناسایی شده`;
+            document.getElementById('market-structure').textContent = marketStructure.structure || 'نامشخص';
+            document.getElementById('bos-signal').textContent = bosSignal ? bosSignal.type : 'عدم وجود سیگنال';
+        }
+
+        function updateTechnicalIndicators(data) {
+            // This would be populated from real market data
+            // For now, showing placeholders
+            document.getElementById('rsi-value').textContent = '--';
+            document.getElementById('macd-signal').textContent = '--';
+            document.getElementById('bb-position').textContent = '--';
+            document.getElementById('trend-direction').textContent = '--';
+        }
+
+        function updateLastUpdateTime() {
+            const now = new Date();
+            document.getElementById('last-update-time').textContent = 
+                now.toLocaleTimeString('fa-IR', {hour: '2-digit', minute: '2-digit'});
+        }
+    </script>
+</body>
+</html>
