@@ -23,12 +23,12 @@ curl -s https://raw.githubusercontent.com/mehradamiri021/goldbot/main/NO_SUDO_IN
 curl -s https://raw.githubusercontent.com/mehradamiri021/goldbot/main/FINAL_INSTALL_SCRIPT.sh | bash
 ```
 
-### روش 2: دانلود فایل tar.gz
+### روش 3: دانلود فایل tar.gz
 ```bash
-# دانلود goldbot-complete-v3.0.tar.gz از این پروژه
-tar -xzf goldbot-complete-v3.0.tar.gz
-chmod +x FINAL_INSTALL_SCRIPT.sh
-./FINAL_INSTALL_SCRIPT.sh
+# دانلود goldbot-complete-final.tar.gz از این پروژه
+tar -xzf goldbot-complete-final.tar.gz
+chmod +x NO_SUDO_INSTALL_SCRIPT.sh
+./NO_SUDO_INSTALL_SCRIPT.sh
 ```
 
 این دستورات:

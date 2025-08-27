@@ -40,12 +40,14 @@ The system is built around four interconnected bots and a central web panel:
 - **FXStreet:** News source for the Analyzer Bot.
 - **@ZaryaalGold Telegram Channel:** Parsed for gold bullion prices (USD, EUR, AED, CNY).
 
-## GitHub Deployment (27 آگوست 2025 - 16:40)
+## GitHub Deployment (27 آگوست 2025 - 17:40)
+- ✅ **مشکل tsx حل شد**: اسکریپت بدون sudo برای حل مشکل دسترسی
+- ✅ **فایل tar.gz آماده**: goldbot-complete-final.tar.gz (126KB) قابل دانلود
+- ✅ **چند روش نصب**: NO_SUDO_INSTALL_SCRIPT.sh، PERMISSION_FIX_SCRIPT.sh
 - ✅ **مشکل صفحه سفید حل شد**: App.tsx کامل با TypeScript interfaces
 - ✅ **UI زیبا**: React dashboard با قیمت‌های لیو و وضعیت ربات‌ها
-- ✅ **نصب یک‌دستوری**: `curl -s https://raw.githubusercontent.com/mehradamiri021/goldbot/main/FINAL_INSTALL_SCRIPT.sh | bash`
-- ✅ **پاک‌سازی فایل‌ها**: حذف فایل‌های اضافی و مرتب‌سازی پروژه
-- ✅ **PM2 config**: tsx --import flag برای Node.js compatibility  
+- ✅ **نصب بدون sudo**: `curl -s https://raw.githubusercontent.com/mehradamiri021/goldbot/main/NO_SUDO_INSTALL_SCRIPT.sh | bash`
+- ✅ **PM2 محلی**: استفاده از npx tsx و node_modules/.bin/pm2
 - ✅ **RTL UI**: طراحی فارسی با Tailwind CSS و gradient
 - ✅ **Auto-refresh**: بروزرسانی خودکار قیمت‌ها هر 30 ثانیه
 - ✅ **API endpoints**: تمام endpoint ها فعال و پاسخگو
