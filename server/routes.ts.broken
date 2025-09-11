@@ -1,0 +1,1261 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { MT5DataService } from "./services/mt5-data-service";
+import { 
+  insertTradingSignalSchema,
+  insertAnalysisReportSchema,
+  insertSystemLogSchema,
+  insertSettingSchema
+} from "@shared/schema";
+import { z } from "zod";
+import multer from "multer";
+import { parse } from "csv-parse/sync";
+
+// Configure multer for file uploads
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv') || 
+        file.originalname.includes('.fxstreet') || file.originalname.endsWith('.txt')) {
+      cb(null, true);
+    } else {
+      cb(new Error('فقط فایل‌های CSV، .fxstreet و .txt مجاز هستند'));
+    }
+  }
+});
+
+// Navasan API Configuration
+const NAVASAN_API_URL = process.env.NAVASAN_API_URL || 'http://api.navasan.tech/latest/';
+const NAVASAN_API_KEY = process.env.NAVASAN_API_KEY || 'freeN6awRKnNNazzbS6zIJSGGQaF6UQ4';
+
+// Import will be done dynamically to avoid module loading issues
+
+// Price update functions
+async function updatePricesFromZaryaalGold() {
+  try {
+    console.log('🔄 Importing telegram scraper...');
+    const scraperModule = await import('./services/telegram-scraper');
+    const scraper = new scraperModule.TelegramScraper();
+    const goldPrices = await scraper.getLatestGoldPrices();
+    
+    if (goldPrices) {
+      console.log('✅ ZaryaalGold prices received:', goldPrices);
+      return {
+        goldUSD: goldPrices.goldUSD || 0,
+        goldEUR: goldPrices.goldEUR || 0,
+        goldAED: goldPrices.goldAED || 0,
+        goldCNY: goldPrices.goldCNY || 0,
+        // قیمت‌های خرید شمش طلا
+        buyTomanFree: goldPrices.buyTomanFree || 0,
+        buyTomanCenter: goldPrices.buyTomanCenter || 0,
+        buyUSDFree: goldPrices.buyUSDFree || 0,
+        buyUSDGold: goldPrices.buyUSDGold || 0,
+        buyUSDDebt: goldPrices.buyUSDDebt || 0,
+        zaryaalLastUpdate: new Date().toISOString()
+      };
+    }
+    console.log('⚠️ No gold prices returned from ZaryaalGold');
+    return null;
+  } catch (error) {
+    console.error('❌ ZaryaalGold price update failed:', error);
+    return null;
+  }
+}
+
+async function updatePricesFromNavasan() {
+  try {
+    console.log('🔄 Attempting Navasan API call with fresh key...');
+    const response = await fetch(`${NAVASAN_API_URL}?api_key=${NAVASAN_API_KEY}`, {
+      headers: {
+        'User-Agent': 'GoldBot/1.0',
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Navasan API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // بررسی quota exceeded
+    if (typeof data === 'string' && data.includes('quota exceeded')) {
+      console.log('⚠️ Navasan API quota exceeded - کلید جدید نیاز است');
+      throw new Error('Quota exceeded - نیاز به کلید API جدید');
+    }
+    
+    // بررسی Invalid API key
+    if (typeof data === 'string' && data.includes('Invalid api_key')) {
+      console.log('⚠️ Navasan API Invalid key');
+      throw new Error('Invalid API key');
+    }
+    console.log('🔍 Checking coin and gold price fields in API response:');
+    console.log('sekkeh field:', data.sekkeh);
+    console.log('bub_sekkeh field:', data.bub_sekkeh);
+    console.log('bub_gerami field:', data.bub_gerami);
+    console.log('18ayar field:', data['18ayar']);
+    console.log('bub_18ayar field:', data.bub_18ayar);
+    
+    // Map Navasan API fields to our format based on actual API structure
+    const prices = {
+      // دلار آمریکا
+      usd: Math.round(parseFloat(data.usd_sell?.value || data.usd_buy?.value || '0')),
+      // یورو
+      eur: Math.round(parseFloat(data.eur?.value || '0')),
+      // دلار کانادا  
+      cad: Math.round(parseFloat(data.cad?.value || '0')),
+      // درهم امارات
+      aed: Math.round(parseFloat(data.aed?.value || '0')),
+      // رمزارزها - using the correct field names from API
+      bitcoin: Math.round(parseFloat(data.btc?.value || data.usd_btc?.value || '0')),
+      ethereum: Math.round(parseFloat(data.eth?.value || data.usd_eth?.value || '0')),
+      tether: Math.round(parseFloat(data.usdt?.value || data.usd_usdt?.value || '0')),
+      // طلا 18 عیار (قیمت هر گرم به ریال) - از فیلد 18ayar اصلی طبق داده‌های کاربر
+      gold18k: Math.round(parseFloat(data['18ayar']?.value || '0')),
+      // سکه امامی (قیمت هر سکه به ریال تبدیل به تومان) - از فیلد sekkeh اصلی طبق داده‌های کاربر  
+      coin: Math.round(parseFloat(data.sekkeh?.value || '0')),
+      navasanLastUpdate: new Date().toISOString()
+    };
+    
+    console.log('Extracted prices:', prices);
+    return prices;
+  } catch (error) {
+    console.error('Navasan price update failed:', error);
+    return null;
+  }
+}
+
+async function updateGoldPricesFromChannel() {
+  try {
+    console.log('🔄 Importing telegram scraper...');
+    const { TelegramScraper } = await import('./services/telegram-scraper');
+    const scraper = new TelegramScraper();
+    
+    console.log('🔍 Attempting to get latest gold prices from ZaryaalGold channel...');
+    const goldPrices = await scraper.getLatestGoldPrices();
+    
+    if (goldPrices) {
+      console.log('✅ ZaryaalGold prices received:', goldPrices);
+      return {
+        ...goldPrices,
+        zaryaalLastUpdate: new Date().toISOString()
+      };
+    }
+    console.log('⚠️ No gold prices returned from ZaryaalGold');
+    return null;
+  } catch (error) {
+    console.error('❌ ZaryaalGold price update failed:', error);
+    return null;
+  }
+}
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Bot Status Routes
+  app.get("/api/bots/status", async (req, res) => {
+    try {
+      const statuses = await storage.getAllBotStatuses();
+      res.json(statuses);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch bot statuses" });
+    }
+  });
+
+  app.post("/api/bots/:botName/status", async (req, res) => {
+    try {
+      const { botName } = req.params;
+      const { status, errorMessage } = req.body;
+      
+      const updatedStatus = await storage.updateBotStatus({
+        botName,
+        status,
+        errorMessage,
+        lastRun: new Date()
+      });
+      
+      res.json(updatedStatus);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update bot status" });
+    }
+  });
+
+  // Trading Signals Routes
+  app.get("/api/signals/pending", async (req, res) => {
+    try {
+      const signals = await storage.getPendingSignals();
+      res.json(signals);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch pending signals" });
+    }
+  });
+
+  app.get("/api/signals/today", async (req, res) => {
+    try {
+      const signals = await storage.getTodaysSignals();
+      res.json(signals);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch today's signals" });
+    }
+  });
+
+  app.post("/api/signals", async (req, res) => {
+    try {
+      const signalData = insertTradingSignalSchema.parse(req.body);
+      const signal = await storage.createTradingSignal(signalData);
+      res.json(signal);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid signal data" });
+    }
+  });
+
+  app.patch("/api/signals/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, approvedBy, entryPrice, stopLoss, takeProfit } = req.body;
+      
+      // If editing prices, update the signal first
+      if (entryPrice || stopLoss || takeProfit) {
+        // In a real implementation, you'd update the signal fields here
+      }
+      
+      const signal = await storage.updateSignalStatus(parseInt(id), status, approvedBy);
+      res.json(signal);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update signal" });
+    }
+  });
+
+  // Analysis Reports Routes
+  app.get("/api/reports", async (req, res) => {
+    try {
+      const { type, limit } = req.query;
+      let reports;
+      
+      if (type) {
+        reports = await storage.getReportsByType(type as string);
+      } else {
+        reports = await storage.getAnalysisReports(limit ? parseInt(limit as string) : 10);
+      }
+      
+      res.json(reports);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch reports" });
+    }
+  });
+
+  app.post("/api/reports", async (req, res) => {
+    try {
+      const reportData = insertAnalysisReportSchema.parse(req.body);
+      const report = await storage.createAnalysisReport(reportData);
+      res.json(report);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid report data" });
+    }
+  });
+
+  // Price History Routes
+  app.get("/api/prices/latest", async (req, res) => {
+    try {
+      const prices = await storage.getLatestPrices();
+      res.json(prices || {});
+    } catch (error) {
+      console.error('Error fetching latest prices:', error);
+      res.status(500).json({ error: "Failed to fetch latest prices", details: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  // Main price endpoint used by frontend
+  app.get("/api/prices", async (req, res) => {
+    try {
+      const prices = await storage.getLatestPrices();
+      res.json(prices || {});
+    } catch (error) {
+      console.error('Error fetching prices:', error);
+      res.status(500).json({ error: "Failed to fetch prices", details: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  // News Routes - Only HIGH and MEDIUM Impact
+  app.get("/api/news", async (req, res) => {
+    try {
+      // Get HIGH and MEDIUM impact events from CSV data first
+      const economicEvents = await storage.getHighMediumImpactEvents();
+      
+      // Convert economic events to news format with proper date/time
+      const newsFromEvents = economicEvents.map((event: any) => ({
+        id: event.id,
+        title: `${event.currency} ${event.name}`,
+        description: `Impact: ${event.impact} | Currency: ${event.currency}`,
+        impact: event.impact,
+        source: 'economic_calendar',
+        time: event.eventTime,
+        date: event.eventDate,
+        eventDate: event.eventDate,
+        eventTime: event.eventTime,
+        publishedAt: new Date(event.eventDate + ' ' + event.eventTime),
+        tags: event.isGoldRelevant ? ['gold', 'relevant'] : ['economic']
+      }));
+
+      // Filter for gold-relevant events only
+      const goldRelevantNews = newsFromEvents.filter((item: any) => {
+        const title = item.title?.toLowerCase() || '';
+        const description = item.description?.toLowerCase() || '';
+        const content = title + ' ' + description;
+        
+        return content.includes('gold') || 
+               content.includes('federal reserve') || 
+               content.includes('interest rate') ||
+               content.includes('inflation') ||
+               content.includes('monetary policy') ||
+               content.includes('non-farm payrolls') ||
+               content.includes('cpi') ||
+               content.includes('xauusd') ||
+               content.includes('precious metals') ||
+               content.includes('usd') ||
+               content.includes('employment') ||
+               content.includes('gdp');
+      });
+      
+      res.json(goldRelevantNews);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch news" });
+    }
+  });
+
+  app.get("/api/news/weekly", async (req, res) => {
+    try {
+      // Get weekly events from CSV data
+      const weeklyEvents = await storage.getWeeklyEvents();
+      
+      // Get latest scraped news from storage (these come from automated scraping)
+      const scrapedNews = await storage.getLatestNews(50);
+      
+      console.log(`Weekly calendar: ${weeklyEvents.length} CSV events, ${scrapedNews.length} scraped news`);
+      
+      // Format CSV events
+      const csvEvents = weeklyEvents.map((event: any) => ({
+        id: `csv_${event.id}`,
+        title: `${event.currency || 'USD'} ${event.name || event.title}`,
+        description: `Impact: ${event.impact} | Currency: ${event.currency || 'USD'}`,
+        impact: event.impact || 'MEDIUM',
+        source: 'economic_calendar',
+        time: event.eventTime || '00:00',
+        date: event.eventDate || new Date().toISOString().split('T')[0],
+        eventDate: event.eventDate || new Date().toISOString().split('T')[0],
+        eventTime: event.eventTime || '00:00',
+        currency: event.currency || 'USD',
+        publishedAt: event.eventDate ? new Date(event.eventDate + ' ' + (event.eventTime || '00:00')) : new Date(),
+        tags: event.isGoldRelevant ? ['gold', 'relevant'] : ['economic']
+      }));
+      
+      // Format scraped news for weekly calendar
+      const newsEvents = (scrapedNews || []).map((news: any) => {
+        // Handle different date formats safely
+        let eventDate = new Date().toISOString().split('T')[0];
+        let publishedAt = new Date();
+        
+        if (news.publishedAt) {
+          publishedAt = new Date(news.publishedAt);
+          eventDate = publishedAt.toISOString().split('T')[0];
+        } else if (news.processedAt) {
+          publishedAt = new Date(news.processedAt);
+          eventDate = publishedAt.toISOString().split('T')[0];
+        }
+        
+        return {
+          id: `news_${news.id}`,
+          title: news.title || 'Economic News',
+          description: news.description || news.content || '',
+          impact: news.impact?.toUpperCase() || 'MEDIUM',
+          source: news.source || 'news',
+          time: news.eventTime || 'All Day',
+          date: eventDate,
+          eventDate: eventDate,
+          eventTime: news.eventTime || 'All Day',
+          currency: 'USD',
+          publishedAt: publishedAt,
+          tags: news.tags || ['economic']
+        };
+      });
+      
+      // Filter out LOW impact events for weekly calendar
+      const filteredCsvEvents = csvEvents.filter(event => 
+        event.impact?.toUpperCase() !== 'LOW'
+      );
+      const filteredNewsEvents = newsEvents.filter(event => 
+        event.impact?.toUpperCase() !== 'LOW'
+      );
+      
+      // Combine both sources and sort by date/time
+      const combinedEvents = [...filteredCsvEvents, ...filteredNewsEvents].sort((a, b) => 
+        a.publishedAt.getTime() - b.publishedAt.getTime()
+      );
+      
+      console.log(`Returning ${combinedEvents.length} total events (${filteredCsvEvents.length} CSV + ${filteredNewsEvents.length} news) - LOW impact filtered`);
+      res.json(combinedEvents);
+    } catch (error) {
+      console.error('Weekly calendar error:', error);
+      res.status(500).json({ error: "Failed to fetch weekly calendar", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  // Gold Important News API - Only gold-related high impact news
+  app.get("/api/news/gold-important", async (req, res) => {
+    try {
+      // Get weekly events from CSV data
+      const weeklyEvents = await storage.getWeeklyEvents();
+      
+      // Get latest scraped news from storage
+      const scrapedNews = await storage.getLatestNews(100);
+      
+      // Filter CSV events for gold relevance and high impact
+      const goldCsvEvents = weeklyEvents
+        .filter((event: any) => event.isGoldRelevant && 
+          (event.impact?.toUpperCase() === 'HIGH' || event.impact?.toUpperCase() === 'MEDIUM'))
+        .map((event: any) => ({
+          id: `gold_csv_${event.id}`,
+          title: `${event.currency || 'USD'} ${event.name || event.title}`,
+          description: `Impact: ${event.impact} | Currency: ${event.currency || 'USD'}`,
+          impact: event.impact || 'MEDIUM',
+          source: 'economic_calendar',
+          time: event.eventTime || '00:00',
+          date: event.eventDate || new Date().toISOString().split('T')[0],
+          eventDate: event.eventDate || new Date().toISOString().split('T')[0],
+          eventTime: event.eventTime || '00:00',
+          currency: event.currency || 'USD',
+          publishedAt: event.eventDate ? new Date(event.eventDate + ' ' + (event.eventTime || '00:00')) : new Date(),
+          tags: ['gold', 'relevant', 'important'],
+          relevanceScore: 85
+        }));
+      
+      // Filter scraped news for gold relevance
+      const goldNewsEvents = (scrapedNews || [])
+        .filter((news: any) => {
+          const title = news.title?.toLowerCase() || '';
+          const content = news.content?.toLowerCase() || '';
+          const description = news.description?.toLowerCase() || '';
+          const allText = title + ' ' + content + ' ' + description;
+          
+          // Check for gold relevance
+          const isGoldRelevant = allText.includes('gold') || 
+            allText.includes('xau') || 
+            allText.includes('precious metals') ||
+            allText.includes('federal reserve') ||
+            allText.includes('interest rate') ||
+            allText.includes('inflation') ||
+            allText.includes('monetary policy') ||
+            allText.includes('dollar strength') ||
+            allText.includes('treasury yields');
+            
+          return isGoldRelevant && (news.impact?.toUpperCase() === 'HIGH' || news.impact?.toUpperCase() === 'MEDIUM');
+        })
+        .map((news: any) => {
+          let eventDate = new Date().toISOString().split('T')[0];
+          let publishedAt = new Date();
+          
+          if (news.publishedAt) {
+            publishedAt = new Date(news.publishedAt);
+            eventDate = publishedAt.toISOString().split('T')[0];
+          } else if (news.processedAt) {
+            publishedAt = new Date(news.processedAt);
+            eventDate = publishedAt.toISOString().split('T')[0];
+          }
+          
+          return {
+            id: `gold_news_${news.id}`,
+            title: news.title || 'Gold Market News',
+            description: news.description || news.content || '',
+            impact: news.impact?.toUpperCase() || 'MEDIUM',
+            source: news.source || 'news',
+            time: news.eventTime || 'All Day',
+            date: eventDate,
+            eventDate: eventDate,
+            eventTime: news.eventTime || 'All Day',
+            currency: 'USD',
+            publishedAt: publishedAt,
+            tags: news.tags || ['gold', 'relevant'],
+            relevanceScore: news.relevanceScore || 75
+          };
+        });
+      
+      // Combine and sort by relevance and date
+      const goldImportantEvents = [...goldCsvEvents, ...goldNewsEvents].sort((a, b) => {
+        // First sort by relevance score (higher first)
+        if (a.relevanceScore !== b.relevanceScore) {
+          return (b.relevanceScore || 0) - (a.relevanceScore || 0);
+        }
+        // Then by date (newer first)
+        return b.publishedAt.getTime() - a.publishedAt.getTime();
+      });
+      
+      console.log(`Returning ${goldImportantEvents.length} gold important events (${goldCsvEvents.length} CSV + ${goldNewsEvents.length} news)`);
+      res.json(goldImportantEvents);
+    } catch (error) {
+      console.error('Gold important news error:', error);
+      res.status(500).json({ error: "Failed to fetch gold important news", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  // FXStreet File Upload System for Weekly Data Management  
+  app.post("/api/upload-csv", upload.single('csvFile'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "هیچ فایلی ارسال نشده است" });
+      }
+
+      const fileContent = req.file.buffer.toString('utf-8');
+      // Support both CSV and FXStreet formats
+      let records;
+      if (req.file.originalname.includes('.fxstreet') || req.file.originalname.includes('.txt')) {
+        // Parse FXStreet format
+        const lines = fileContent.split('
+').filter(line => line.trim());
+        records = lines.map((line, index) => {
+          const parts = line.split('\t'); // Tab separated
+          return {
+            Start: parts[0] || '',
+            Name: parts[1] || '',
+            Currency: parts[2] || 'USD',
+            Impact: parts[3] || 'MEDIUM'
+          };
+        });
+      } else {
+        // Parse CSV format
+        records = parse(fileContent, {
+          columns: true,
+          skip_empty_lines: true,
+          trim: true
+        });
+      }
+
+      if (!records || records.length === 0) {
+        return res.status(400).json({ error: "فایل خالی است" });
+      }
+
+      // Parse CSV data and extract events
+      const economicEvents = records.map((record: any) => {
+        const startDateTime = new Date(record.Start);
+        const eventDate = startDateTime.toISOString().split('T')[0];
+        const eventTime = startDateTime.toTimeString().slice(0, 5);
+        
+        // Determine if event is gold relevant
+        const title = record.Name?.toLowerCase() || '';
+        const currency = record.Currency?.toLowerCase() || '';
+        const isGoldRelevant = 
+          title.includes('gold') || 
+          title.includes('federal reserve') || 
+          title.includes('interest rate') ||
+          title.includes('inflation') ||
+          title.includes('cpi') ||
+          title.includes('employment') ||
+          title.includes('gdp') ||
+          currency.includes('usd');
+
+        return {
+          csvFileId: 1, // Will be updated after CSV file is saved
+          eventId: record.Id || `event_${Date.now()}_${Math.random()}`,
+          eventDate,
+          eventTime,
+          name: record.Name || 'Unknown Event',
+          impact: record.Impact || 'LOW',
+          currency: record.Currency || 'USD',
+          isGoldRelevant
+        };
+      });
+
+      // Calculate week range
+      const dates = economicEvents.map(e => new Date(e.eventDate));
+      const dateTimes = dates.map(d => d.getTime());
+      const weekStart = new Date(Math.min(...dateTimes)).toISOString().split('T')[0];
+      const weekEnd = new Date(Math.max(...dateTimes)).toISOString().split('T')[0];
+
+      // Save CSV file info
+      const csvFile = await storage.uploadWeeklyCSV({
+        filename: req.file.originalname,
+        content: req.file.buffer,
+        weekStart,
+        weekEnd,
+        eventsCount: economicEvents.length
+      });
+
+      // Update events with correct CSV file ID
+      const eventsWithFileId = economicEvents.map(event => ({
+        ...event,
+        csvFileId: csvFile.id
+      }));
+
+      // Save economic events
+      await storage.saveEconomicEvents(eventsWithFileId);
+
+      await storage.createLog({
+        level: 'info',
+        message: `فایل CSV هفتگی بارگذاری شد: ${economicEvents.length} رویداد`,
+        source: 'csv-upload',
+        metadata: `فایل: ${req.file.originalname} | هفته: ${weekStart} تا ${weekEnd}`
+      });
+
+      res.json({
+        success: true,
+        message: `${economicEvents.length} رویداد اقتصادی بارگذاری شد`,
+        csvFile: {
+          id: csvFile.id,
+          filename: csvFile.filename,
+          eventsCount: csvFile.eventsCount,
+          weekStart: csvFile.weekStart,
+          weekEnd: csvFile.weekEnd
+        },
+        goldRelevantCount: economicEvents.filter(e => e.isGoldRelevant).length,
+        highMediumCount: economicEvents.filter(e => e.impact === 'HIGH' || e.impact === 'MEDIUM').length
+      });
+
+    } catch (error) {
+      await storage.createLog({
+        level: 'error',
+        message: 'خطا در بارگذاری فایل CSV',
+        source: 'csv-upload',
+        metadata: error instanceof Error ? error.message : String(error)
+      });
+      
+      res.status(500).json({ error: "خطا در پردازش فایل CSV" });
+    }
+  });
+
+  // Get uploaded CSV files history
+  app.get("/api/csv-files", async (req, res) => {
+    try {
+      const csvFiles = await storage.getAllWeeklyCSVs();
+      res.json(csvFiles);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch CSV files" });
+    }
+  });
+
+  // Chart Data Routes
+  app.get("/api/chart/latest", async (req, res) => {
+    try {
+      const chartData = await storage.getLatestChartData();
+      res.json(chartData);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch chart data" });
+    }
+  });
+
+  app.get("/api/chart/:timeframe", async (req, res) => {
+    try {
+      const { timeframe } = req.params;
+      const { limit } = req.query;
+      
+      const chartData = await storage.getChartData(
+        timeframe, 
+        limit ? parseInt(limit as string) : 100
+      );
+      
+      res.json(chartData);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch chart data" });
+    }
+  });
+
+  // System Logs Routes
+  app.get("/api/logs", async (req, res) => {
+    try {
+      const { level, limit } = req.query;
+      let logs;
+      
+      if (level) {
+        logs = await storage.getLogsByLevel(level as string);
+      } else {
+        logs = await storage.getRecentLogs(limit ? parseInt(limit as string) : 50);
+      }
+      
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch logs" });
+    }
+  });
+
+  app.post("/api/logs", async (req, res) => {
+    try {
+      const logData = insertSystemLogSchema.parse(req.body);
+      const log = await storage.createLog(logData);
+      res.json(log);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid log data" });
+    }
+  });
+
+  // Settings Routes
+  app.get("/api/settings", async (req, res) => {
+    try {
+      const settings = await storage.getAllSettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  app.get("/api/settings/:key", async (req, res) => {
+    try {
+      const { key } = req.params;
+      const setting = await storage.getSetting(key);
+      if (!setting) {
+        return res.status(404).json({ error: "Setting not found" });
+      }
+      res.json(setting);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch setting" });
+    }
+  });
+
+  app.post("/api/settings", async (req, res) => {
+    try {
+      const settingData = insertSettingSchema.parse(req.body);
+      const setting = await storage.setSetting(settingData);
+      res.json(setting);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid setting data" });
+    }
+  });
+
+  // Bot Control Routes
+  app.post("/api/bots/:botName/start", async (req, res) => {
+    try {
+      const { botName } = req.params;
+      // In a real implementation, you'd start the actual bot process here
+      
+      await storage.updateBotStatus({
+        botName,
+        status: 'running',
+        lastRun: new Date(),
+        errorMessage: null
+      });
+
+      await storage.createLog({
+        level: 'info',
+        message: `Bot ${botName} started`,
+        source: 'api'
+      });
+      
+      res.json({ success: true, message: `Bot ${botName} started` });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to start bot" });
+    }
+  });
+
+  app.post("/api/bots/:botName/stop", async (req, res) => {
+    try {
+      const { botName } = req.params;
+      // In a real implementation, you'd stop the actual bot process here
+      
+      await storage.updateBotStatus({
+        botName,
+        status: 'stopped',
+        lastRun: new Date(),
+        errorMessage: null
+      });
+
+      await storage.createLog({
+        level: 'info',
+        message: `Bot ${botName} stopped`,
+        source: 'api'
+      });
+      
+      res.json({ success: true, message: `Bot ${botName} stopped` });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to stop bot" });
+    }
+  });
+
+  // Log Management Routes
+  app.get("/api/logs/stats", async (req, res) => {
+    try {
+      const stats = await storage.getLogStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch log stats" });
+    }
+  });
+
+  app.get("/api/logs/download", async (req, res) => {
+    try {
+      const { bot, level, date } = req.query;
+      
+      let logs;
+      if (bot && bot !== 'all') {
+        logs = await storage.getLogsByBot(bot as string);
+      } else if (level && level !== 'all') {
+        logs = await storage.getLogsByLevel(level as string);
+      } else {
+        logs = await storage.getRecentLogs(1000); // Get more logs for download
+      }
+
+      // Filter by date if provided
+      if (date) {
+        const filterDate = new Date(date as string);
+        logs = logs.filter((log: any) => {
+          const logDate = new Date(log.timestamp);
+          return logDate.toDateString() === filterDate.toDateString();
+        });
+      }
+
+      // Format logs as text
+      const logText = logs.map((log: any) => {
+        return `[${log.timestamp}] ${log.level?.toUpperCase()} [${log.botName || log.source || 'SYSTEM'}] ${log.message}${log.details ? '
+  Details: ' + log.details : ''}${log.error ? '
+  Error: ' + log.error : ''}`;
+      }).join('
+');
+
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Disposition', `attachment; filename="logs-${bot || 'all'}-${level || 'all'}-${date || new Date().toISOString().split('T')[0]}.txt"`);
+      res.send(logText);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to download logs" });
+    }
+  });
+
+  app.delete("/api/logs/clear", async (req, res) => {
+    try {
+      const { bot, olderThan } = req.body;
+      
+      if (olderThan) {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - olderThan);
+        await storage.clearOldLogs(cutoffDate);
+      } else if (bot) {
+        await storage.clearLogsByBot(bot);
+      }
+
+      await storage.createLog({
+        level: 'info',
+        message: `Logs cleared: ${bot ? `bot=${bot}` : `older than ${olderThan} days`}`,
+        source: 'api'
+      });
+      
+      res.json({ success: true, message: "Logs cleared successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to clear logs" });
+    }
+  });
+
+  // Manual Actions
+  app.post("/api/actions/send-prices", async (req, res) => {
+    try {
+      // Import and use price fetcher
+      const { priceFetcher } = await import('./services/price-fetcher');
+      await priceFetcher.updateAllPrices();
+      
+      await storage.createLog({
+        level: 'info',
+        message: 'Manual price update triggered via API',
+        source: 'api'
+      });
+      
+      res.json({ success: true, message: "Price update triggered successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to trigger price update" });
+    }
+  });
+
+  app.post("/api/actions/fetch-news", async (req, res) => {
+    try {
+      // Import and use news scraper
+      const { newsScraper } = await import('./services/news-scraper');
+      const news = await newsScraper.fetchAllNews();
+      
+      await storage.createLog({
+        level: 'info',
+        message: `Manual news fetch triggered via API. ${news.length} news items processed`,
+        source: 'api'
+      });
+      
+      res.json({ success: true, message: `Fetched ${news.length} news items`, data: news });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch news" });
+    }
+  });
+
+  app.post("/api/actions/backup", async (req, res) => {
+    try {
+      await storage.createLog({
+        level: 'info',
+        message: 'System backup initiated',
+        source: 'api'
+      });
+      
+      res.json({ success: true, message: "Backup created successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create backup" });
+    }
+  });
+
+  // Price Management APIs
+  app.get("/api/prices", async (req, res) => {
+    try {
+      // Force no-cache headers
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'ETag': `"${Date.now()}"` // Unique ETag per request
+      });
+      
+      const prices = await storage.getLatestPrices();
+      
+      // اگر قیمت‌هایی موجود نیست، یک object خالی برگردان
+      if (!prices) {
+        return res.json({
+          usd: 0,
+          eur: 0,
+          cad: 0,
+          aed: 0,
+          bitcoin: 0,
+          ethereum: 0,
+          tether: 0,
+          gold18k: 0,
+          coin: 0,
+          goldBar: {
+            usd: 0,
+            eur: 0,
+            aed: 0,
+            cny: 0
+          },
+          lastUpdated: null,
+          sources: {
+            navasan: false,
+            zaryaal: false
+          }
+        });
+      }
+      
+      // ساختار مناسب برای frontend
+      const response = {
+        // قیمت‌های ارز از API نوسان
+        usd: prices.usd || 0,
+        eur: prices.eur || 0,
+        cad: prices.cad || 0,
+        aed: prices.aed || 0,
+        bitcoin: prices.bitcoin || 0,
+        ethereum: prices.ethereum || 0,
+        tether: prices.tether || 0,
+        gold18k: prices.gold18k || 0,
+        coin: prices.coin || 0,
+        
+        // قیمت‌های شمش طلا از ZaryaalGold
+        goldBar: {
+          usd: prices.goldUSD || 0,
+          eur: prices.goldEUR || 0,
+          aed: prices.goldAED || 0,
+          cny: prices.goldCNY || 0
+        },
+        
+        // اطلاعات تکمیلی
+        lastUpdated: prices.lastUpdated || prices.zaryaalLastUpdate,
+        navasanLastUpdate: prices.navasanLastUpdate,
+        zaryaalLastUpdate: prices.zaryaalLastUpdate,
+        
+        // وضعیت منابع
+        sources: {
+          navasan: !!(prices.usd || prices.navasanLastUpdate),
+          zaryaal: !!(prices.goldUSD || prices.zaryaalLastUpdate)
+        }
+      };
+      
+      res.json(response);
+    } catch (error) {
+      console.error('Error fetching prices:', error);
+      res.status(500).json({ error: "Failed to fetch prices", details: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  // Price Bot Test Route
+  app.post("/api/actions/test-price-announcement", async (req, res) => {
+    try {
+      const { PriceBot } = await import('./bots/price-bot');
+      const priceBot = new PriceBot();
+      await priceBot.testAnnouncement();
+      res.json({ success: true, message: "تست ارسال قیمت‌ها انجام شد" });
+    } catch (error) {
+      console.error("Test price announcement failed:", error);
+      res.status(500).json({ success: false, message: "خطا در تست ارسال قیمت‌ها" });
+    }
+  });
+
+  // MT5 Data Routes - New live data endpoints
+  const mt5Service = new (await import('./services/mt5-data-service')).MT5DataService();
+  
+  app.get("/api/mt5/status", async (req, res) => {
+    try {
+      const status = await mt5Service.checkDataAvailability();
+      const hasLiveData = Object.values(status).some(available => available);
+      
+      res.json({
+        connected: hasLiveData,
+        files: status,
+        timestamp: new Date().toISOString(),
+        dataPath: '/data/mt5/csv'
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to check MT5 status" });
+    }
+  });
+
+  app.get("/api/mt5/latest", async (req, res) => {
+    try {
+      const { symbol = 'XAUUSD' } = req.query;
+      const data = await mt5Service.getCurrentPrice(symbol as string);
+      
+      if (data) {
+        res.json(data);
+      } else {
+        res.status(503).json({ error: 'MT5 data unavailable' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch latest MT5 data" });
+    }
+  });
+
+  app.get("/api/mt5/chart/:timeframe", async (req, res) => {
+    try {
+      const { timeframe } = req.params;
+      const { symbol = 'XAUUSD' } = req.query;
+      
+      const response = await mt5Service.getLatestData(symbol as string, timeframe);
+      
+      if (response.success) {
+        res.json(response);
+      } else {
+        res.status(503).json({ error: 'Chart data unavailable' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch chart data" });
+    }
+  });
+
+  app.get("/api/mt5/multi-timeframe", async (req, res) => {
+    try {
+      const { symbol = 'XAUUSD' } = req.query;
+      const data = await mt5Service.getMultiTimeframeData(symbol as string);
+      
+      res.json({
+        symbol,
+        data,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch multi-timeframe data" });
+    }
+  });
+
+  // Test Navasan API endpoint
+  app.get('/api/prices/test-navasan', async (req, res) => {
+    try {
+      console.log('🧪 Testing Navasan API...');
+      const response = await fetch(`${NAVASAN_API_URL}?api_key=${NAVASAN_API_KEY}`);
+      const data = await response.text(); // Get as text first
+      
+      if (data.includes('quota exceeded')) {
+        return res.json({
+          success: false,
+          message: 'کلید API نوسان quota exceeded - کلید جدید نیاز دارید',
+          details: data
+        });
+      }
+      
+      const jsonData = JSON.parse(data);
+      return res.json({
+        success: true,
+        message: 'API نوسان کار می‌کند',
+        sampleData: Object.keys(jsonData).slice(0, 5)
+      });
+    } catch (error) {
+      return res.json({
+        success: false,
+        message: 'خطا در تست API نوسان',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Update API key endpoint
+  app.post('/api/settings/update-navasan-key', async (req, res) => {
+    try {
+      const { apiKey } = req.body;
+      if (!apiKey || typeof apiKey !== 'string') {
+        return res.status(400).json({ error: 'کلید API معتبر ارائه دهید' });
+      }
+
+      // Test the new API key
+      const testResponse = await fetch(`${NAVASAN_API_URL}?api_key=${apiKey}`);
+      const testData = await testResponse.text();
+      
+      if (testData.includes('quota exceeded')) {
+        return res.status(400).json({ 
+          error: 'کلید API وارد شده نیز quota exceeded است',
+          details: testData
+        });
+      }
+      
+      if (testData.includes('Invalid api_key')) {
+        return res.status(400).json({ 
+          error: 'کلید API نامعتبر است',
+          details: testData
+        });
+      }
+
+      // If successful, update the environment variable (for current session)
+      process.env.NAVASAN_API_KEY = apiKey;
+      
+      console.log('✅ Navasan API key updated successfully');
+      
+      return res.json({
+        success: true,
+        message: 'کلید API نوسان با موفقیت بروزرسانی شد',
+        testSample: Object.keys(JSON.parse(testData)).slice(0, 5)
+      });
+    } catch (error) {
+      return res.status(500).json({
+        error: 'خطا در بروزرسانی کلید API',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post("/api/actions/update-prices", async (req, res) => {
+    try {
+      console.log('🔄 Manual price update initiated from both sources...');
+      
+      // Update prices from Navasan API
+      const navasanPrices = await updatePricesFromNavasan();
+      console.log('Navasan prices updated:', navasanPrices ? 'success' : 'failed');
+      
+      // Update gold prices from ZaryaalGold channel
+      const goldPrices = await updatePricesFromZaryaalGold();
+      console.log('ZaryaalGold prices updated:', goldPrices ? 'success' : 'failed');
+      
+      if (navasanPrices || goldPrices) {
+        // Get current prices to preserve existing data
+        const currentPrices = await storage.getLatestPrices();
+        
+        // Combine and store prices
+        const combinedPrices = {
+          ...currentPrices,
+          ...(navasanPrices || {}),
+          ...(goldPrices || {}),
+          lastUpdated: new Date().toISOString()
+        };
+        
+        await storage.updatePrices(combinedPrices);
+        
+        await storage.createLog({
+          level: 'info',
+          message: 'قیمت‌ها به‌صورت دستی از هر دو منبع بروزرسانی شد',
+          source: 'manual-update',
+          metadata: `Navasan: ${navasanPrices ? 'OK' : 'Failed'}, ZaryaalGold: ${goldPrices ? 'OK' : 'Failed'}`
+        });
+        
+        res.json({ 
+          success: true, 
+          message: "قیمت‌ها از هر دو منبع بروزرسانی شد",
+          data: combinedPrices,
+          sources: {
+            navasan: !!navasanPrices,
+            zaryaal: !!goldPrices
+          }
+        });
+      } else {
+        throw new Error('Failed to fetch prices from any source');
+      }
+    } catch (error) {
+      console.error('Price update error:', error);
+      
+      await storage.createLog({
+        level: 'error',
+        message: 'خطا در بروزرسانی دستی قیمت‌ها',
+        source: 'manual-update',
+        metadata: error instanceof Error ? error.message : String(error)
+      });
+      
+      res.status(500).json({ 
+        error: "خطا در بروزرسانی قیمت‌ها", 
+        details: error instanceof Error ? error.message : String(error) 
+      });
+    }
+  });
+
+  // تست ربات تحلیل‌گر
+  app.post('/api/actions/test-morning-analysis', async (req, res) => {
+    try {
+      const { AnalysisBot } = await import('./bots/analysis-bot');
+      const analysisBot = new AnalysisBot();
+      await analysisBot.testMorningAnalysis();
+      
+      res.json({ 
+        success: true, 
+        message: 'تست تحلیل صبحانه انجام شد' 
+      });
+    } catch (error) {
+      console.error('Test morning analysis error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'خطا در تست تحلیل صبحانه' 
+      });
+    }
+  });
+
+  app.post('/api/actions/test-afternoon-analysis', async (req, res) => {
+    try {
+      const { AnalysisBot } = await import('./bots/analysis-bot');
+      const analysisBot = new AnalysisBot();
+      await analysisBot.testAfternoonAnalysis();
+      
+      res.json({ 
+        success: true, 
+        message: 'تست تحلیل عصرانه انجام شد' 
+      });
+    } catch (error) {
+      console.error('Test afternoon analysis error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'خطا در تست تحلیل عصرانه' 
+      });
+    }
+  });
+
+  app.post('/api/actions/test-weekly-analysis', async (req, res) => {
+    try {
+      const { AnalysisBot } = await import('./bots/analysis-bot');
+      const analysisBot = new AnalysisBot();
+      await analysisBot.testWeeklyAnalysis();
+      
+      res.json({ 
+        success: true, 
+        message: 'تست تحلیل هفتگی انجام شد' 
+      });
+    } catch (error) {
+      console.error('Test weekly analysis error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'خطا در تست تحلیل هفتگی' 
+      });
+    }
+  });
+
+  // تست ربات سیگنال‌دهی
+  app.post('/api/actions/test-signal-generation', async (req, res) => {
+    try {
+      const { SignalBot } = await import('./bots/signal-bot');
+      const signalBot = new SignalBot();
+      await signalBot.testSignalGeneration();
+      res.json({ success: true, message: 'تست تولید سیگنال انجام شد' });
+    } catch (error) {
+      console.error('Failed to test signal generation:', error);
+      res.status(500).json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
